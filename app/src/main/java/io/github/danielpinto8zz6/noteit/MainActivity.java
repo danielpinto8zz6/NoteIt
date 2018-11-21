@@ -1,5 +1,6 @@
 package io.github.danielpinto8zz6.noteit;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.GridLayoutManager;
@@ -39,6 +40,8 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent myIntent = new Intent(MainActivity.this, CreateNoteActivity.class);
+                MainActivity.this.startActivity(myIntent);
             }
         });
 
