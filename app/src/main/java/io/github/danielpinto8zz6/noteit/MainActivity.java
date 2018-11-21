@@ -2,7 +2,6 @@ package io.github.danielpinto8zz6.noteit;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,6 +24,9 @@ import io.github.danielpinto8zz6.noteit.model.NoteIt;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    private RecyclerView.LayoutManager listLayout;
+    private RecyclerView.LayoutManager gridLayout;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +39,6 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
             }
         });
 
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity
         Log.d("NoteIt", "After Decrypt & From Base64: " + deansBase64);
 
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler);
 
         NoteIt noteIt = new NoteIt();
 
@@ -105,10 +105,10 @@ public class MainActivity extends AppCompatActivity
 
         recyclerView.setAdapter(new NotesAdapter(noteIt.getNotes(), this));
 
-        RecyclerView.LayoutManager listLayout = new LinearLayoutManager(this,
+        listLayout = new LinearLayoutManager(this,
                 LinearLayoutManager.VERTICAL, false);
 
-        RecyclerView.LayoutManager gridLayout = new GridLayoutManager(this,
+        gridLayout = new GridLayoutManager(this,
                 2);
 
         recyclerView.setLayoutManager(gridLayout);
@@ -127,6 +127,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.icons_main, menu);
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -141,6 +142,14 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        } else if (id == R.id.action_change_layout) {
+            if (recyclerView.getLayoutManager() == listLayout) {
+                recyclerView.setLayoutManager(gridLayout);
+                item.setIcon(R.drawable.ic_grid);
+            } else {
+                recyclerView.setLayoutManager(listLayout);
+                item.setIcon(R.drawable.ic_list);
+            }
         }
 
         return super.onOptionsItemSelected(item);
