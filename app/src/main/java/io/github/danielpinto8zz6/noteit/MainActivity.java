@@ -3,6 +3,9 @@ package io.github.danielpinto8zz6.noteit;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -13,11 +16,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import java.io.UnsupportedEncodingException;
 
 import io.github.danielpinto8zz6.noteit.encryption.AESHelper;
+import io.github.danielpinto8zz6.noteit.model.Note;
+import io.github.danielpinto8zz6.noteit.model.NoteIt;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -47,18 +51,16 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        TextView tv = findViewById(R.id.textview);
-
         String msg = "123456";
         String keyStr = "abcdef";
         String ivStr = "ABCDEF";
 
-        Log.d("NoteIt","Before Encrypt: " + msg);
+        Log.d("NoteIt", "Before Encrypt: " + msg);
 
         byte[] ans = new byte[0];
         try {
             ans = AESHelper.encrypt(ivStr, keyStr, msg.getBytes());
-            Log.d("NoteIt","After Encrypt: " + new String(ans, "UTF-8"));
+            Log.d("NoteIt", "After Encrypt: " + new String(ans, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -76,7 +78,7 @@ public class MainActivity extends AppCompatActivity
         byte[] deans;
         try {
             deans = AESHelper.decrypt(ivStr, keyStr, ans);
-            Log.d("NoteIt","After Decrypt: " + new String(deans, "UTF-8"));
+            Log.d("NoteIt", "After Decrypt: " + new String(deans, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -89,7 +91,27 @@ public class MainActivity extends AppCompatActivity
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.d("NoteIt","After Decrypt & From Base64: " + deansBase64);
+        Log.d("NoteIt", "After Decrypt & From Base64: " + deansBase64);
+
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler);
+
+        NoteIt noteIt = new NoteIt();
+
+        noteIt.addNote(new Note("Testing", "The description is here!"));
+        noteIt.addNote(new Note("Testing 2", "The description is here 2!"));
+        noteIt.addNote(new Note("Testing 3", "The description is here 3!"));
+        noteIt.addNote(new Note("Testing 4", "The description is here 4!"));
+
+        recyclerView.setAdapter(new NotesAdapter(noteIt.getNotes(), this));
+
+        RecyclerView.LayoutManager listLayout = new LinearLayoutManager(this,
+                LinearLayoutManager.VERTICAL, false);
+
+        RecyclerView.LayoutManager gridLayout = new GridLayoutManager(this,
+                2);
+
+        recyclerView.setLayoutManager(gridLayout);
     }
 
     @Override

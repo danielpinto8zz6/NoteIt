@@ -3,11 +3,12 @@ package io.github.danielpinto8zz6.noteit.model;
 import android.graphics.Color;
 import android.media.Image;
 
+import java.util.Calendar;
 import java.util.Date;
 
 public class Note {
     private String title;
-    private String text;
+    private String description;
     private Date createDate;
     private Date notifyDate;
     private Color color;
@@ -16,6 +17,14 @@ public class Note {
 
     public Note() {
         this.status = Status.ACTIVE;
+        this.createDate = Calendar.getInstance().getTime();
+    }
+
+    public Note(String title, String description) {
+        this.status = Status.ACTIVE;
+        this.createDate = Calendar.getInstance().getTime();
+        this.title = title;
+        this.description = description;
     }
 
     public String getTitle() {
@@ -24,14 +33,6 @@ public class Note {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
     }
 
     public Date getCreateDate() {
@@ -72,6 +73,14 @@ public class Note {
 
     public void setImage(Image image) {
         this.image = image;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public enum Status {
