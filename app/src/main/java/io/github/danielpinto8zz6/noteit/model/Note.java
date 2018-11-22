@@ -3,10 +3,11 @@ package io.github.danielpinto8zz6.noteit.model;
 import android.graphics.Color;
 import android.media.Image;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 
-public class Note {
+public class Note implements Serializable {
     private String title;
     private String description;
     private Date createDate;

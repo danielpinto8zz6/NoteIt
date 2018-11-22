@@ -2,7 +2,9 @@ package io.github.danielpinto8zz6.noteit;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,18 +18,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.io.UnsupportedEncodingException;
 
 import io.github.danielpinto8zz6.noteit.encryption.AESHelper;
 import io.github.danielpinto8zz6.noteit.model.Note;
-import io.github.danielpinto8zz6.noteit.model.NoteIt;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private RecyclerView.LayoutManager listLayout;
     private RecyclerView.LayoutManager gridLayout;
     private RecyclerView recyclerView;
+    private NoteIt noteIt;
+    SwipeRefreshLayout swipeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +44,8 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent myIntent = new Intent(MainActivity.this, CreateNoteActivity.class);
-                MainActivity.this.startActivity(myIntent);
+                Intent createNote = new Intent(getApplicationContext(), CreateNoteActivity.class);
+                startActivity(createNote);
             }
         });
 
@@ -99,7 +103,7 @@ public class MainActivity extends AppCompatActivity
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler);
 
-        NoteIt noteIt = new NoteIt();
+        noteIt = (NoteIt) getApplication();
 
         noteIt.addNote(new Note("Testing", "The description is here!"));
         noteIt.addNote(new Note("Testing 2", "The description is here 2!"));
@@ -115,6 +119,17 @@ public class MainActivity extends AppCompatActivity
                 2);
 
         recyclerView.setLayoutManager(gridLayout);
+
+        // Getting SwipeContainerLayout
+        swipeLayout = findViewById(R.id.swipe_container);
+        // Adding Listener
+        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                recyclerView.getAdapter().notifyDataSetChanged();
+                swipeLayout.setRefreshing(false);
+            }
+        });
     }
 
     @Override
