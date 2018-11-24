@@ -45,4 +45,12 @@ public class CreateNoteActivity extends AppCompatActivity {
 
         Log.d("NoteIt", "Note added!");
     }
+
+    public void addNoteTest(String title, String description) {
+        if (title.isEmpty())
+            return;
+
+        NoteIt noteIt = (NoteIt) getApplication();
+        noteIt.addNote(new Note(title, description));
+    }
 }
