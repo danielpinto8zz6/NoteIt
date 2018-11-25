@@ -1,4 +1,4 @@
-package io.github.danielpinto8zz6.noteit;
+package io.github.danielpinto8zz6.noteit.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,10 +19,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import io.github.danielpinto8zz6.noteit.R;
 import io.github.danielpinto8zz6.noteit.encryption.AESHelper;
 import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;

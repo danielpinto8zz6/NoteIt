@@ -1,4 +1,4 @@
-package io.github.danielpinto8zz6.noteit;
+package io.github.danielpinto8zz6.noteit.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import java.util.Objects;
 
+import io.github.danielpinto8zz6.noteit.R;
 import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 

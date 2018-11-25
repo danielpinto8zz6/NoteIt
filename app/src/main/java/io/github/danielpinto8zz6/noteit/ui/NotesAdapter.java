@@ -1,4 +1,4 @@
-package io.github.danielpinto8zz6.noteit;
+package io.github.danielpinto8zz6.noteit.ui;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;
@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import io.github.danielpinto8zz6.noteit.R;
 import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 
