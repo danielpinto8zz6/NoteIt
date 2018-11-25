@@ -1,10 +1,8 @@
 package io.github.danielpinto8zz6.noteit;
 
-import android.widget.TextView;
 import org.junit.Before;
 import io.github.danielpinto8zz6.noteit.model.Note;
-import io.github.danielpinto8zz6.noteit.CreateNoteActivity;
-import io.github.danielpinto8zz6.noteit.NoteIt;
+
 import org.junit.Test;
 
 import static io.github.danielpinto8zz6.noteit.model.Note.Status.ACTIVE;
@@ -13,7 +11,7 @@ import static org.junit.Assert.*;
 public class UnitNoteTest {
 
     Note note1, note2, note3, note4 = null;
-    //CreateNoteActivity.addNoteTest("Note-1", "");
+    //EditNoteActivity.addNoteTest("Note-1", "");
 
     @Before
     public void setUpNote() {

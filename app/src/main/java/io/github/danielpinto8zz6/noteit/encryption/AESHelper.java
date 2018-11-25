@@ -1,13 +1,13 @@
 package io.github.danielpinto8zz6.noteit.encryption;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.spec.IvParameterSpec;
+import android.util.Base64;
 
 import java.security.MessageDigest;
 import java.security.spec.AlgorithmParameterSpec;
 
-import android.util.Base64;
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class AESHelper {
     public static byte[] encrypt(String ivStr, String keyStr, byte[] bytes) throws Exception {
