@@ -23,7 +23,7 @@ public class DbManager {
     }
 
 
-    protected static DbManager getsInstance() {
+    static DbManager getsInstance() {
         if (sInstance==null) throw new NullPointerException("DbManager is null, Please set DbManger.setConfig(this) in your activity before using the DAO objects.");
         return sInstance;
     }
@@ -33,7 +33,7 @@ public class DbManager {
         this.mCtx = ctx;
     }
 
-    protected DbManager() {}
+    DbManager() {}
 
     public DbManager open() {
         mDbHelper = new DbHelper(this);
@@ -41,11 +41,11 @@ public class DbManager {
         return this;
     }
 
-    public void close() {
+    void close() {
         mDbHelper.close();
     }
 
-    public SQLiteDatabase getDatabase() {
+    SQLiteDatabase getDatabase() {
         mDbHelper = new DbHelper(this);
         mDb = mDbHelper.getWritableDatabase();
         return mDb;
@@ -55,7 +55,7 @@ public class DbManager {
         private static DbHelper sInstance;
 
         private static final String LOG_TAG = "DbHelper";
-        private DbManager mDbManager;
+        private final DbManager mDbManager;
 
         public static DbHelper getInstance(DbManager manager) {
             if (sInstance == null) {

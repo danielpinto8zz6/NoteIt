@@ -4,14 +4,14 @@ import android.os.Bundle;
 
 public class Note {
 
-    public static final String COL_ID = "id";
-    public static final String COL_TITLE = "title";
-    public static final String COL_CONTENT = "content";
-    public static final String COL_CREATE_DATE = "create_date";
-    public static final String COL_NOTIFY_DATE = "notify_date";
-    public static final String COL_COLOR = "color";
-    public static final String COL_STATUS = "status";
-    public static final String COL_IMAGE = "image";
+    private static final String COL_ID = "id";
+    private static final String COL_TITLE = "title";
+    private static final String COL_CONTENT = "content";
+    private static final String COL_CREATE_DATE = "create_date";
+    private static final String COL_NOTIFY_DATE = "notify_date";
+    private static final String COL_COLOR = "color";
+    private static final String COL_STATUS = "status";
+    private static final String COL_IMAGE = "image";
 
     private Integer id;
     private String title;

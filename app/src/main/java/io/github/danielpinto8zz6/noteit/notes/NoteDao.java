@@ -1,6 +1,8 @@
 package io.github.danielpinto8zz6.noteit.notes;
 
 import java.util.ArrayList;
+import java.util.Objects;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -10,20 +12,20 @@ import android.text.TextUtils;
 public class NoteDao extends DbManager {
     private static final String TAG = "NoteDao";
 
-    protected static SQLiteDatabase database;
-    protected static DbManager mDbManager;
-    protected static  String[] allColumns = DbSchema.Table_Note.allColumns;
+    private static SQLiteDatabase database;
+    private static DbManager mDbManager;
+    private static final String[] allColumns = DbSchema.Table_Note.allColumns;
 
 
     protected NoteDao() {
     }
 
-    protected static void database_open() throws SQLException {
+    private static void database_open() throws SQLException {
         mDbManager = DbManager.getsInstance();
         database = mDbManager.getDatabase();
     }
 
-    protected static void database_close() {
+    private static void database_close() {
         mDbManager = DbManager.getsInstance();
         mDbManager.close();
     }
@@ -36,7 +38,7 @@ public class NoteDao extends DbManager {
             cursor.moveToFirst();
 
         Note note = new Note();
-        note = cursorToNote(cursor);
+        note = cursorToNote(Objects.requireNonNull(cursor));
 
         cursor.close();
         database_close();
@@ -45,7 +47,7 @@ public class NoteDao extends DbManager {
     }
 
     public static ArrayList<Note> loadAllRecords() {
-        ArrayList<Note> noteList = new ArrayList<Note>();
+        ArrayList<Note> noteList = new ArrayList<>();
         database_open();
 
         Cursor cursor = database.query(
@@ -82,11 +84,11 @@ public class NoteDao extends DbManager {
         Cursor cursor = database.query(
                 DbSchema.Table_Note.TABLE_NAME,
                 allColumns,
-                selection==null ? null : selection,
-                selectionArgs==null ? null : selectionArgs,
-                groupBy==null ? null : groupBy,
-                having==null ? null : having,
-                orderBy==null ? null : orderBy);
+                selection,
+                selectionArgs,
+                groupBy,
+                having,
+                orderBy);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
@@ -141,7 +143,7 @@ public class NoteDao extends DbManager {
         return deletedCount;
     }
 
-    protected static ContentValues getNoteValues(Note note) {
+    private static ContentValues getNoteValues(Note note) {
         ContentValues values = new ContentValues();
 
         values.put(DbSchema.Table_Note.COL_ID, note.getId());
@@ -156,7 +158,7 @@ public class NoteDao extends DbManager {
         return values;
     }
 
-    protected static Note cursorToNote(Cursor cursor)  {
+    private static Note cursorToNote(Cursor cursor)  {
         Note note = new Note();
 
         note.setId(cursor.getInt(cursor.getColumnIndex(DbSchema.Table_Note.COL_ID)));

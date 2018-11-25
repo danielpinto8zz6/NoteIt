@@ -1,16 +1,15 @@
 package io.github.danielpinto8zz6.noteit;
 
 import org.junit.Before;
-import io.github.danielpinto8zz6.noteit.model.Note;
 
 import org.junit.Test;
 
-import static io.github.danielpinto8zz6.noteit.model.Note.Status.ACTIVE;
-import static org.junit.Assert.*;
-
 public class UnitNoteTest {
 
-    Note note1, note2, note3, note4 = null;
+    private Note note1;
+    private Note note2;
+    private Note note3;
+    private Note note4 = null;
     //EditNoteActivity.addNoteTest("Note-1", "");
 
     @Before

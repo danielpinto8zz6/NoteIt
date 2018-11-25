@@ -21,6 +21,7 @@ import android.view.View;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import io.github.danielpinto8zz6.noteit.encryption.AESHelper;
 import io.github.danielpinto8zz6.noteit.notes.Note;
@@ -30,7 +31,7 @@ import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ACTIVE;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    SwipeRefreshLayout swipeLayout;
+    private SwipeRefreshLayout swipeLayout;
     private RecyclerView.LayoutManager listLayout;
     private RecyclerView.LayoutManager gridLayout;
     private RecyclerView recyclerView;
@@ -40,25 +41,22 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent createNote = new Intent(getApplicationContext(), EditNoteActivity.class);
-                startActivity(createNote);
-            }
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(view -> {
+            Intent createNote = new Intent(getApplicationContext(), EditNoteActivity.class);
+            startActivity(createNote);
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         notes = getActiveNotes();
@@ -73,8 +71,6 @@ public class MainActivity extends AppCompatActivity
         try {
             ans = AESHelper.encrypt(ivStr, keyStr, msg.getBytes());
             Log.d("App", "After Encrypt: " + new String(ans, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -91,15 +87,13 @@ public class MainActivity extends AppCompatActivity
         try {
             deans = AESHelper.decrypt(ivStr, keyStr, ans);
             Log.d("App", "After Decrypt: " + new String(deans, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         String deansBase64 = null;
         try {
-            deansBase64 = AESHelper.decryptStrAndFromBase64(ivStr, keyStr, ansBase64);
+            deansBase64 = AESHelper.decryptStrAndFromBase64(ivStr, keyStr, Objects.requireNonNull(ansBase64));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -118,19 +112,16 @@ public class MainActivity extends AppCompatActivity
         // Getting SwipeContainerLayout
         swipeLayout = findViewById(R.id.swipe_container);
         // Adding Listener
-        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                notes = getActiveNotes();
-                NotesAdapter adapter = (NotesAdapter) recyclerView.getAdapter();
-                adapter.setNotes(notes);
-                adapter.notifyDataSetChanged();
-                swipeLayout.setRefreshing(false);
-            }
+        swipeLayout.setOnRefreshListener(() -> {
+            notes = getActiveNotes();
+            NotesAdapter adapter = (NotesAdapter) recyclerView.getAdapter();
+            adapter.setNotes(notes);
+            adapter.notifyDataSetChanged();
+            swipeLayout.setRefreshing(false);
         });
     }
 
-    public ArrayList<Note> getActiveNotes() {
+    private ArrayList<Note> getActiveNotes() {
         ArrayList<Note> notes = new ArrayList<>();
 
         for (Note note : NoteDao.loadAllRecords()) {
@@ -147,12 +138,12 @@ public class MainActivity extends AppCompatActivity
 
         notes = getActiveNotes();
         NotesAdapter adapter = (NotesAdapter) recyclerView.getAdapter();
-        adapter.setNotes(notes);
+        Objects.requireNonNull(adapter).setNotes(notes);
         adapter.notifyDataSetChanged();
     }
 
     private void setUpRecyclerView() {
-        recyclerView = (RecyclerView) findViewById(R.id.recycler);
+        recyclerView = findViewById(R.id.recycler);
         recyclerView.setAdapter(new NotesAdapter(notes, this));
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
@@ -180,7 +171,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -239,7 +230,7 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

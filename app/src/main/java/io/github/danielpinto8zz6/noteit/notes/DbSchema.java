@@ -2,13 +2,13 @@ package io.github.danielpinto8zz6.noteit.notes;
 
 import android.provider.BaseColumns;
 
-public class DbSchema {
+class DbSchema {
     private static final String TAG = "DbSchema";
 
     public static final String DATABASE_NAME = "NoteIt";
     public static final int DATABASE_VERSION = 1;
-    public static final String SORT_ASC = " ASC";
-    public static final String SORT_DESC = " DESC";
+    private static final String SORT_ASC = " ASC";
+    private static final String SORT_DESC = " DESC";
     public static final String[] ORDERS = {SORT_ASC,SORT_DESC};
     public static final int OFF = 0;
     public static final int ON = 1;

@@ -22,7 +22,7 @@ public class AESHelper {
         return encrypt(ivBytes, keyBytes, bytes);
     }
 
-    static byte[] encrypt(byte[] ivBytes, byte[] keyBytes, byte[] bytes) throws Exception {
+    private static byte[] encrypt(byte[] ivBytes, byte[] keyBytes, byte[] bytes) throws Exception {
         AlgorithmParameterSpec ivSpec = new IvParameterSpec(ivBytes);
         SecretKeySpec newKey = new SecretKeySpec(keyBytes, "AES");
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -42,7 +42,7 @@ public class AESHelper {
         return decrypt(ivBytes, keyBytes, bytes);
     }
 
-    static byte[] decrypt(byte[] ivBytes, byte[] keyBytes, byte[] bytes) throws Exception {
+    private static byte[] decrypt(byte[] ivBytes, byte[] keyBytes, byte[] bytes) throws Exception {
         AlgorithmParameterSpec ivSpec = new IvParameterSpec(ivBytes);
         SecretKeySpec newKey = new SecretKeySpec(keyBytes, "AES");
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");

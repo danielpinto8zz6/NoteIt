@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Objects;
+
 import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 
@@ -20,7 +22,7 @@ public class EditNoteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_note);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         titleTv = findViewById(R.id.note_title_input);
@@ -29,9 +31,6 @@ public class EditNoteActivity extends AppCompatActivity {
         Intent intent = getIntent(); // gets the previously created intent
         id = intent.getIntExtra("id", -1);
 
-        /**
-         * Editing note
-         */
         if (id != -1) {
             editing = true;
 
@@ -60,7 +59,7 @@ public class EditNoteActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    public void addNote() {
+    private void addNote() {
         String title = titleTv.getText().toString();
         String content = contentTv.getText().toString();
 
@@ -74,7 +73,7 @@ public class EditNoteActivity extends AppCompatActivity {
         NoteDao.insertRecord(note);
     }
 
-    public void updateNote() {
+    private void updateNote() {
         String title = titleTv.getText().toString();
         String content = contentTv.getText().toString();
 

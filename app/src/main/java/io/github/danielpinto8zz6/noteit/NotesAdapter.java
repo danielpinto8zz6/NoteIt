@@ -17,7 +17,7 @@ import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_FILED;
 
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
-    private Activity activity;
+    private final Activity activity;
     private List<Note> notes;
 
     private Note mRecentlyFiledItem;
@@ -38,14 +38,12 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         View view = LayoutInflater.from(activity)
                 .inflate(R.layout.item_note, parent, false);
 
-        NotesViewHolder holder = new NotesViewHolder(view);
-
-        return holder;
+        return new NotesViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull NotesViewHolder notesViewHolder, int i) {
-        NotesViewHolder holder = (NotesViewHolder) notesViewHolder;
+        NotesViewHolder holder = notesViewHolder;
 
         Note note = notes.get(i);
 
@@ -73,12 +71,9 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         View view = activity.findViewById(R.id.drawer_layout);
         final Snackbar snackbar = Snackbar.make(view, R.string.note_filed,
                 Snackbar.LENGTH_LONG);
-        snackbar.setAction(R.string.snack_bar_undo, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                undoFile();
-                snackbar.dismiss();
-            }
+        snackbar.setAction(R.string.snack_bar_undo, v -> {
+            undoFile();
+            snackbar.dismiss();
         });
         snackbar.show();
     }
@@ -93,11 +88,11 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         final TextView title;
         final TextView content;
 
-        public NotesViewHolder(View view) {
+        NotesViewHolder(View view) {
             super(view);
 
-            title = (TextView) view.findViewById(R.id.item_note_title);
-            content = (TextView) view.findViewById(R.id.item_note_content);
+            title = view.findViewById(R.id.item_note_title);
+            content = view.findViewById(R.id.item_note_content);
         }
     }
 }

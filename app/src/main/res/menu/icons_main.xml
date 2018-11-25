@@ -8,7 +8,7 @@
         android:id="@+id/action_change_layout"
         android:icon="@drawable/ic_grid"
         android:orderInCategory="300"
-        android:title="Layout"
+        android:title="@string/layout"
         app:showAsAction="ifRoom" />
 
 </menu>
