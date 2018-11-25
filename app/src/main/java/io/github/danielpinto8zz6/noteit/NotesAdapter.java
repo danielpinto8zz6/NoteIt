@@ -11,14 +11,14 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import io.github.danielpinto8zz6.noteit.model.Note;
+import io.github.danielpinto8zz6.noteit.notes.Note;
+import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_FILED;
 
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
     private Activity activity;
     private List<Note> notes;
-    DBHelper db;
 
     private Note mRecentlyFiledItem;
     private int mRecentlyFiledItemPosition;
@@ -26,7 +26,10 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     public NotesAdapter(List<Note> notes, Activity activity) {
         this.notes = notes;
         this.activity = activity;
-        db = new DBHelper(activity.getApplicationContext());
+    }
+
+    public void setNotes (List<Note> notes) {
+        this.notes = notes;
     }
 
     @Override
@@ -60,7 +63,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         mRecentlyFiledItemPosition = position;
         Note note = notes.get(position);
         note.setStatus(STATUS_FILED);
-        db.updateNote(note);
+        NoteDao.updateRecord(note);
         notes.remove(notes.get(position));
         notifyItemRemoved(position);
         showUndoSnackbar();

@@ -6,11 +6,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import io.github.danielpinto8zz6.noteit.model.Note;
+import io.github.danielpinto8zz6.noteit.notes.Note;
+import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 
 public class EditNoteActivity extends AppCompatActivity {
-    DBHelper db;
-    private String id;
+    private int id;
     private boolean editing = false;
     private TextView titleTv;
     private TextView contentTv;
@@ -26,15 +26,13 @@ public class EditNoteActivity extends AppCompatActivity {
         titleTv = findViewById(R.id.note_title_input);
         contentTv = findViewById(R.id.note_content_input);
 
-        db = new DBHelper(getApplicationContext());
-
         Intent intent = getIntent(); // gets the previously created intent
-        id = intent.getStringExtra("id");
+        id = intent.getIntExtra("id", -1);
 
         /**
          * Editing note
          */
-        if (id != null) {
+        if (id != -1) {
             editing = true;
 
             String title = getIntent().getStringExtra("title");
@@ -69,15 +67,22 @@ public class EditNoteActivity extends AppCompatActivity {
         if (title.isEmpty() && content.isEmpty())
             return;
 
-        db.insertNote(title, content);
-        Toast.makeText(getApplicationContext(), "Done", Toast.LENGTH_LONG).show();
+        Note note = new Note ();
+        note.setTitle(title);
+        note.setContent(content);
+
+        NoteDao.insertRecord(note);
     }
 
     public void updateNote() {
         String title = titleTv.getText().toString();
         String content = contentTv.getText().toString();
 
-        db.updateNote(new Note(id, title, content));
+        Note note = NoteDao.loadRecordById(id);
+        note.setTitle(title);
+        note.setContent(content);
+
+        NoteDao.updateRecord(note);
 
         Toast.makeText(getApplicationContext(), "Done", Toast.LENGTH_LONG).show();
     }

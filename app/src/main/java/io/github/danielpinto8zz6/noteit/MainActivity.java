@@ -1,7 +1,6 @@
 package io.github.danielpinto8zz6.noteit;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -24,22 +23,14 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import io.github.danielpinto8zz6.noteit.encryption.AESHelper;
-import io.github.danielpinto8zz6.noteit.model.Note;
+import io.github.danielpinto8zz6.noteit.notes.Note;
+import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 
-import static io.github.danielpinto8zz6.noteit.Constants.INPUT_COLUMN_COLOR;
-import static io.github.danielpinto8zz6.noteit.Constants.INPUT_COLUMN_CONTENT;
-import static io.github.danielpinto8zz6.noteit.Constants.INPUT_COLUMN_CREATE_DATE;
-import static io.github.danielpinto8zz6.noteit.Constants.INPUT_COLUMN_ID;
-import static io.github.danielpinto8zz6.noteit.Constants.INPUT_COLUMN_IMAGE;
-import static io.github.danielpinto8zz6.noteit.Constants.INPUT_COLUMN_NOTIFY_DATE;
-import static io.github.danielpinto8zz6.noteit.Constants.INPUT_COLUMN_STATUS;
-import static io.github.danielpinto8zz6.noteit.Constants.INPUT_COLUMN_TITLE;
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ACTIVE;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     SwipeRefreshLayout swipeLayout;
-    DBHelper db;
     private RecyclerView.LayoutManager listLayout;
     private RecyclerView.LayoutManager gridLayout;
     private RecyclerView recyclerView;
@@ -70,9 +61,7 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        db = new DBHelper(getApplicationContext());
-
-        loadNotes();
+        notes = getActiveNotes();
 
         String msg = "123456";
         String keyStr = "abcdef";
@@ -132,19 +121,34 @@ public class MainActivity extends AppCompatActivity
         swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                loadNotes();
-                recyclerView.getAdapter().notifyDataSetChanged();
+                notes = getActiveNotes();
+                NotesAdapter adapter = (NotesAdapter) recyclerView.getAdapter();
+                adapter.setNotes(notes);
+                adapter.notifyDataSetChanged();
                 swipeLayout.setRefreshing(false);
             }
         });
+    }
+
+    public ArrayList<Note> getActiveNotes() {
+        ArrayList<Note> notes = new ArrayList<>();
+
+        for (Note note : NoteDao.loadAllRecords()) {
+            if (note.getStatus() == STATUS_ACTIVE) {
+                notes.add(note);
+            }
+        }
+        return notes;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        loadNotes();
-        recyclerView.getAdapter().notifyDataSetChanged();
+        notes = getActiveNotes();
+        NotesAdapter adapter = (NotesAdapter) recyclerView.getAdapter();
+        adapter.setNotes(notes);
+        adapter.notifyDataSetChanged();
     }
 
     private void setUpRecyclerView() {
@@ -172,31 +176,6 @@ public class MainActivity extends AppCompatActivity
                 ItemTouchHelper(new SwipeToDeleteCallback((NotesAdapter) recyclerView.getAdapter()));
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
-    }
-
-    private void loadNotes() {
-        notes.clear();
-        Cursor cursor = db.getNotes();
-        if (cursor.moveToFirst()) {
-            while (cursor.isAfterLast() == false) {
-                Note note = new Note();
-
-                note.setId(cursor.getString(cursor.getColumnIndex(INPUT_COLUMN_ID)));
-                note.setTitle(cursor.getString(cursor.getColumnIndex(INPUT_COLUMN_TITLE)));
-                note.setContent(cursor.getString(cursor.getColumnIndex(INPUT_COLUMN_CONTENT)));
-                note.setStatus(cursor.getInt(cursor.getColumnIndex(INPUT_COLUMN_STATUS)));
-                note.setCreateDate(cursor.getString(cursor.getColumnIndex(INPUT_COLUMN_CREATE_DATE)));
-                note.setNotifyDate(cursor.getString(cursor.getColumnIndex(INPUT_COLUMN_NOTIFY_DATE)));
-                note.setColor(cursor.getString(cursor.getColumnIndex(INPUT_COLUMN_COLOR)));
-                note.setColor(cursor.getString(cursor.getColumnIndex(INPUT_COLUMN_IMAGE)));
-
-                if (note.getStatus() == STATUS_ACTIVE) {
-                    notes.add(note);
-                }
-
-                cursor.moveToNext();
-            }
-        }
     }
 
     @Override
