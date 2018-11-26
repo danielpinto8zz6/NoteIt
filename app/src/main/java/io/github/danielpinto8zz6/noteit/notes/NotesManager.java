@@ -6,7 +6,7 @@ public class NotesManager {
     public static final int ACTIVE = 0;
     public static final int ARCHIVED = 1;
 
-    private int mode = 0;
+    private int mode = ACTIVE;
 
     private ArrayList<Note> notes;
     private ArrayList<Note> active;
@@ -28,6 +28,16 @@ public class NotesManager {
                 return archived.get(position);
         }
         return notes.get(position);
+    }
+
+    public ArrayList<Note> getAll() {
+        switch (mode) {
+            case 0:
+                return active;
+            case 1:
+                return archived;
+        }
+        return notes;
     }
 
     public int size() {

@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity
                         if (isMultiSelect) {
                             multiSelect(position);
                         } else {
-                            Note note = notes.getActive().get(position);
+                            Note note = notes.get(position);
                             Intent intent = new Intent(getApplicationContext(), EditNoteActivity.class);
                             intent.putExtra("note", (Note) note);
                             startActivity(intent);
@@ -210,7 +210,7 @@ public class MainActivity extends AppCompatActivity
         Note note = notes.get(position);
         note.setStatus(STATUS_ARCHIVED);
         NoteDao.updateRecord(note);
-        notes.getActive().remove(notes.get(position));
+        notes.getAll().remove(notes.get(position));
         notesAdapter.notifyItemRemoved(position);
         showUndoSnackbar();
     }
@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity
     private void undoArchive() {
         recentlyArchivedNote.setStatus(STATUS_ACTIVE);
         NoteDao.updateRecord(recentlyArchivedNote);
-        notes.getActive().add(recentlyArchivedNotePosition,
+        notes.getAll().add(recentlyArchivedNotePosition,
                 recentlyArchivedNote);
         notesAdapter.notifyItemInserted(recentlyArchivedNotePosition);
     }
@@ -298,6 +298,13 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         MenuInflater inflater = mode.getMenuInflater();
         inflater.inflate(R.menu.menu_select, menu);
+
+        if (notes.getMode() == NotesManager.ACTIVE) {
+            menu.findItem(R.id.action_unarchive).setVisible(false);
+        } else {
+            menu.findItem(R.id.action_archive).setVisible(false);
+        }
+
         return true;
     }
 
@@ -333,6 +340,19 @@ public class MainActivity extends AppCompatActivity
                 for (int id : selectedIds) {
                     Note note = NoteDao.loadRecordById(id);
                     note.setStatus(STATUS_ARCHIVED);
+                    NoteDao.updateRecord(note);
+                }
+
+                notes.refresh();
+                mode.finish();
+                selectedIds.clear();
+                notesAdapter.notifyDataSetChanged();
+
+                return true;
+            case R.id.action_unarchive:
+                for (int id : selectedIds) {
+                    Note note = NoteDao.loadRecordById(id);
+                    note.setStatus(STATUS_ACTIVE);
                     NoteDao.updateRecord(note);
                 }
 

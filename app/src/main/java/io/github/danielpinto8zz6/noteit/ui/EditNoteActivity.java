@@ -14,6 +14,8 @@ import io.github.danielpinto8zz6.noteit.Utils;
 import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 
+import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ACTIVE;
+
 public class EditNoteActivity extends AppCompatActivity {
     private Note note;
     private boolean editing = false;
@@ -28,6 +30,7 @@ public class EditNoteActivity extends AppCompatActivity {
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setElevation(0);
 
         titleTv = findViewById(R.id.note_title_input);
         contentTv = findViewById(R.id.note_content_input);
@@ -56,6 +59,11 @@ public class EditNoteActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.icons_edit_note, menu);
+
+        if (note != null && note.getStatus() != STATUS_ACTIVE) {
+            menu.findItem(R.id.action_archive).setVisible(false);
+        }
+
         return true;
     }
 
