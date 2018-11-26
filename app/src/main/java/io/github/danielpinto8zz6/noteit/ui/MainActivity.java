@@ -17,6 +17,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.Html;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -68,7 +69,15 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                if (newState == DrawerLayout.STATE_SETTLING && !drawer.isDrawerOpen(GravityCompat.START)) {
+                    if (actionMode != null)
+                        actionMode.finish();
+                }
+            }
+        };
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -217,7 +226,7 @@ public class MainActivity extends AppCompatActivity
 
     private void showUndoSnackbar() {
         View view = findViewById(R.id.drawer_layout);
-        final Snackbar snackbar = Snackbar.make(view, R.string.note_archived,
+        final Snackbar snackbar = Snackbar.make(view, Html.fromHtml("<font color=\"#ffffff\">" + R.string.note_archived + "</font>"),
                 Snackbar.LENGTH_LONG);
         snackbar.setAction(R.string.snack_bar_undo, v -> {
             undoArchive();
@@ -283,9 +292,11 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_notes) {
             notes.setMode(NotesManager.ACTIVE);
+            notes.refresh();
             notesAdapter.notifyDataSetChanged();
         } else if (id == R.id.nav_archive) {
             notes.setMode(NotesManager.ARCHIVED);
+            notes.refresh();
             notesAdapter.notifyDataSetChanged();
         }
 
@@ -320,7 +331,6 @@ public class MainActivity extends AppCompatActivity
                 new AlertDialog.Builder(this)
                         .setTitle(getString(R.string.delete))
                         .setMessage(getString(R.string.delete_confirmation))
-                        .setIcon(android.R.drawable.ic_dialog_alert)
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
                             public void onClick(DialogInterface dialog, int whichButton) {

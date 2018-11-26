@@ -15,6 +15,8 @@ import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ACTIVE;
+import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ARCHIVED;
+import static io.github.danielpinto8zz6.noteit.Constants.STATUS_DELETED;
 
 public class EditNoteActivity extends AppCompatActivity {
     private Note note;
@@ -73,6 +75,14 @@ public class EditNoteActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
+        if (id == R.id.action_archive) {
+            // TODO: archive, delete
+            note.setStatus(STATUS_ARCHIVED);
+        } else if (id == R.id.action_delete) {
+            note.setStatus(STATUS_DELETED);
+        } else if (id == R.id.action_add_alert) {
+        }
 
         return super.onOptionsItemSelected(item);
     }
