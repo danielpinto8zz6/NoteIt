@@ -11,4 +11,6 @@
     <string name="snack_bar_undo">Undo</string>
     <string name="note_filed">Note filed</string>
     <string name="layout">Layout</string>
+    <string name="delete">Delete</string>
+    <string name="delete_confirmation">Are you sure you wanna delete?</string>
 </resources>

@@ -1,5 +1,6 @@
 package io.github.danielpinto8zz6.noteit.ui;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -8,6 +9,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,7 +17,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -30,12 +34,18 @@ import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ACTIVE;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, ActionMode.Callback {
     private SwipeRefreshLayout swipeLayout;
     private RecyclerView.LayoutManager listLayout;
     private RecyclerView.LayoutManager gridLayout;
     private RecyclerView recyclerView;
     private ArrayList<Note> notes = new ArrayList<>();
+    private NotesAdapter notesAdapter;
+
+    private ActionMode actionMode;
+    private boolean isMultiSelect = false;
+    //i created List of int type to store id of data, you can create custom class type data according to your need.
+    private ArrayList<Integer> selectedIds = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,22 +154,36 @@ public class MainActivity extends AppCompatActivity
 
     private void setUpRecyclerView() {
         recyclerView = findViewById(R.id.recycler);
-        recyclerView.setAdapter(new NotesAdapter(notes, this));
+        notesAdapter = new NotesAdapter(notes, this);
+        recyclerView.setAdapter(notesAdapter);
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(this, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        Note note = notes.get(position);
-                        Intent intent = new Intent(getApplicationContext(), EditNoteActivity.class);
-                        intent.putExtra("id", note.getId());
-                        intent.putExtra("title", note.getTitle());
-                        intent.putExtra("content", note.getContent());
-                        startActivity(intent);
+                        if (isMultiSelect) {
+                            multiSelect(position);
+                        } else {
+                            Note note = notes.get(position);
+                            Intent intent = new Intent(getApplicationContext(), EditNoteActivity.class);
+                            intent.putExtra("id", note.getId());
+                            intent.putExtra("title", note.getTitle());
+                            intent.putExtra("content", note.getContent());
+                            startActivity(intent);
+                        }
                     }
 
                     @Override
                     public void onLongItemClick(View view, int position) {
-                        // do whatever
+                        if (!isMultiSelect) {
+                            selectedIds = new ArrayList<>();
+                            isMultiSelect = true;
+
+                            if (actionMode == null) {
+                                actionMode = startActionMode(MainActivity.this); //show ActionMode.
+                            }
+                        }
+
+                        multiSelect(position);
                     }
                 })
         );
@@ -167,6 +191,27 @@ public class MainActivity extends AppCompatActivity
                 ItemTouchHelper(new SwipeToDeleteCallback((NotesAdapter) recyclerView.getAdapter()));
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
+    }
+
+    private void multiSelect(int position) {
+        Note note = notesAdapter.getItem(position);
+        if (note != null) {
+            if (actionMode != null) {
+                if (selectedIds.contains(note.getId()))
+                    selectedIds.remove(Integer.valueOf(note.getId()));
+                else
+                    selectedIds.add(note.getId());
+
+                if (selectedIds.size() > 0)
+                    actionMode.setTitle(String.valueOf(selectedIds.size())); //show selected item count on action mode.
+                else {
+                    actionMode.setTitle(""); //remove item count from action mode.
+                    actionMode.finish(); //hide action mode.
+                }
+                notesAdapter.setSelectedIds(selectedIds);
+
+            }
+        }
     }
 
     @Override
@@ -233,5 +278,51 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.menu_select, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_delete:
+                new AlertDialog.Builder(this)
+                        .setTitle(getString(R.string.delete))
+                        .setMessage(getString(R.string.delete_confirmation))
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                for (int id : selectedIds) {
+                                    NoteDao.deleteRecord(String.valueOf(id));
+                                }
+                                mode.finish();
+                                selectedIds.clear();
+                                notesAdapter.setNotes(getActiveNotes());
+                                notesAdapter.notifyDataSetChanged();
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, null).show();
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onDestroyActionMode(ActionMode mode) {
+        actionMode = null;
+        isMultiSelect = false;
+        selectedIds = new ArrayList<>();
+        notesAdapter.setSelectedIds(new ArrayList<Integer>());
     }
 }

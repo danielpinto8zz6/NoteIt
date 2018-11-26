@@ -11,7 +11,7 @@
         android:orientation="vertical"
         android:padding="8dp">
 
-        <android.support.v7.widget.CardView
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="6dp">
@@ -20,14 +20,14 @@
                 android:id="@+id/note_title_input"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:autofillHints=""
                 android:background="@null"
                 android:hint="@string/title"
                 android:inputType="text"
-                android:textSize="22sp"
-                android:autofillHints="" />
-        </android.support.v7.widget.CardView>
+                android:textSize="22sp" />
+        </FrameLayout>
 
-        <android.support.v7.widget.CardView
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="6dp">
@@ -42,7 +42,7 @@
                 android:inputType="textMultiLine"
                 android:lines="6" />
 
-        </android.support.v7.widget.CardView>
+        </FrameLayout>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

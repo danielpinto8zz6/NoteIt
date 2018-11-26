@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.Objects;
 
@@ -51,13 +50,19 @@ public class EditNoteActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onPause() {
         if (editing) {
             updateNote();
         } else {
             addNote();
+            editing = true;
         }
 
-        super.onBackPressed();
+        super.onPause();
     }
 
     private void addNote() {
@@ -67,11 +72,11 @@ public class EditNoteActivity extends AppCompatActivity {
         if (title.isEmpty() && content.isEmpty())
             return;
 
-        Note note = new Note ();
+        Note note = new Note();
         note.setTitle(title);
         note.setContent(content);
 
-        NoteDao.insertRecord(note);
+        id = (int) NoteDao.insertRecord(note);
     }
 
     private void updateNote() {
@@ -83,7 +88,5 @@ public class EditNoteActivity extends AppCompatActivity {
         note.setContent(content);
 
         NoteDao.updateRecord(note);
-
-        Toast.makeText(getApplicationContext(), "Done", Toast.LENGTH_LONG).show();
     }
 }
