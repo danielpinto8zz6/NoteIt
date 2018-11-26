@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -30,8 +31,10 @@ import io.github.danielpinto8zz6.noteit.R;
 import io.github.danielpinto8zz6.noteit.encryption.AESHelper;
 import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;
+import io.github.danielpinto8zz6.noteit.notes.NotesManager;
 
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ACTIVE;
+import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ARCHIVED;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, ActionMode.Callback {
@@ -39,19 +42,22 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView.LayoutManager listLayout;
     private RecyclerView.LayoutManager gridLayout;
     private RecyclerView recyclerView;
-    private ArrayList<Note> notes = new ArrayList<>();
     private NotesAdapter notesAdapter;
+    private Toolbar toolbar;
 
     private ActionMode actionMode;
     private boolean isMultiSelect = false;
-    //i created List of int type to store id of data, you can create custom class type data according to your need.
     private ArrayList<Integer> selectedIds = new ArrayList<>();
+    private NotesManager notes;
+
+    private Note recentlyArchivedNote;
+    private int recentlyArchivedNotePosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -68,8 +74,9 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.getMenu().getItem(0).setChecked(true);
 
-        notes = getActiveNotes();
+        notes = new NotesManager();
 
         String msg = "123456";
         String keyStr = "abcdef";
@@ -123,33 +130,18 @@ public class MainActivity extends AppCompatActivity
         swipeLayout = findViewById(R.id.swipe_container);
         // Adding Listener
         swipeLayout.setOnRefreshListener(() -> {
-            notes = getActiveNotes();
-            NotesAdapter adapter = (NotesAdapter) recyclerView.getAdapter();
-            adapter.setNotes(notes);
-            adapter.notifyDataSetChanged();
+            notes.refresh();
+            notesAdapter.notifyDataSetChanged();
             swipeLayout.setRefreshing(false);
         });
-    }
-
-    private ArrayList<Note> getActiveNotes() {
-        ArrayList<Note> notes = new ArrayList<>();
-
-        for (Note note : NoteDao.loadAllRecords()) {
-            if (note.getStatus() == STATUS_ACTIVE) {
-                notes.add(note);
-            }
-        }
-        return notes;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        notes = getActiveNotes();
-        NotesAdapter adapter = (NotesAdapter) recyclerView.getAdapter();
-        Objects.requireNonNull(adapter).setNotes(notes);
-        adapter.notifyDataSetChanged();
+        notes.refresh();
+        notesAdapter.notifyDataSetChanged();
     }
 
     private void setUpRecyclerView() {
@@ -163,17 +155,15 @@ public class MainActivity extends AppCompatActivity
                         if (isMultiSelect) {
                             multiSelect(position);
                         } else {
-                            Note note = notes.get(position);
+                            Note note = notes.getActive().get(position);
                             Intent intent = new Intent(getApplicationContext(), EditNoteActivity.class);
-                            intent.putExtra("id", note.getId());
-                            intent.putExtra("title", note.getTitle());
-                            intent.putExtra("content", note.getContent());
+                            intent.putExtra("note", (Note) note);
                             startActivity(intent);
                         }
                     }
 
                     @Override
-                    public void onLongItemClick(View view, int position) {
+                    public void onItemLongClick(View view, int position) {
                         if (!isMultiSelect) {
                             selectedIds = new ArrayList<>();
                             isMultiSelect = true;
@@ -188,7 +178,7 @@ public class MainActivity extends AppCompatActivity
                 })
         );
         ItemTouchHelper itemTouchHelper = new
-                ItemTouchHelper(new SwipeToDeleteCallback((NotesAdapter) recyclerView.getAdapter()));
+                ItemTouchHelper(new SwipeToDeleteCallback(this, (NotesAdapter) recyclerView.getAdapter()));
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
     }
@@ -212,6 +202,36 @@ public class MainActivity extends AppCompatActivity
 
             }
         }
+    }
+
+    public void archiveItem(int position) {
+        recentlyArchivedNote = notes.get(position);
+        recentlyArchivedNotePosition = position;
+        Note note = notes.get(position);
+        note.setStatus(STATUS_ARCHIVED);
+        NoteDao.updateRecord(note);
+        notes.getActive().remove(notes.get(position));
+        notesAdapter.notifyItemRemoved(position);
+        showUndoSnackbar();
+    }
+
+    private void showUndoSnackbar() {
+        View view = findViewById(R.id.drawer_layout);
+        final Snackbar snackbar = Snackbar.make(view, R.string.note_archived,
+                Snackbar.LENGTH_LONG);
+        snackbar.setAction(R.string.snack_bar_undo, v -> {
+            undoArchive();
+            snackbar.dismiss();
+        });
+        snackbar.show();
+    }
+
+    private void undoArchive() {
+        recentlyArchivedNote.setStatus(STATUS_ACTIVE);
+        NoteDao.updateRecord(recentlyArchivedNote);
+        notes.getActive().add(recentlyArchivedNotePosition,
+                recentlyArchivedNote);
+        notesAdapter.notifyItemInserted(recentlyArchivedNotePosition);
     }
 
     @Override
@@ -261,18 +281,12 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        if (id == R.id.nav_notes) {
+            notes.setMode(NotesManager.ACTIVE);
+            notesAdapter.notifyDataSetChanged();
+        } else if (id == R.id.nav_archive) {
+            notes.setMode(NotesManager.ARCHIVED);
+            notesAdapter.notifyDataSetChanged();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -306,13 +320,27 @@ public class MainActivity extends AppCompatActivity
                                 for (int id : selectedIds) {
                                     NoteDao.deleteRecord(String.valueOf(id));
                                 }
+
+                                notes.refresh();
                                 mode.finish();
                                 selectedIds.clear();
-                                notesAdapter.setNotes(getActiveNotes());
                                 notesAdapter.notifyDataSetChanged();
                             }
                         })
                         .setNegativeButton(android.R.string.no, null).show();
+                return true;
+            case R.id.action_archive:
+                for (int id : selectedIds) {
+                    Note note = NoteDao.loadRecordById(id);
+                    note.setStatus(STATUS_ARCHIVED);
+                    NoteDao.updateRecord(note);
+                }
+
+                notes.refresh();
+                mode.finish();
+                selectedIds.clear();
+                notesAdapter.notifyDataSetChanged();
+
                 return true;
         }
         return false;

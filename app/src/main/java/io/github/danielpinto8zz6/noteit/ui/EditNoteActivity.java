@@ -3,43 +3,70 @@ package io.github.danielpinto8zz6.noteit.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import java.util.Objects;
 
 import io.github.danielpinto8zz6.noteit.R;
+import io.github.danielpinto8zz6.noteit.Utils;
 import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 
 public class EditNoteActivity extends AppCompatActivity {
-    private int id;
+    private Note note;
     private boolean editing = false;
     private TextView titleTv;
     private TextView contentTv;
+    private TextView dateTv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_note);
+        setContentView(R.layout.activity_edit_note);
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         titleTv = findViewById(R.id.note_title_input);
         contentTv = findViewById(R.id.note_content_input);
+        dateTv = findViewById(R.id.note_date);
+
+        dateTv.setText(Utils.getCurrentDateTime());
 
         Intent intent = getIntent(); // gets the previously created intent
-        id = intent.getIntExtra("id", -1);
+        note = (Note) intent.getParcelableExtra("note");
 
-        if (id != -1) {
+        if (note != null) {
             editing = true;
 
-            String title = getIntent().getStringExtra("title");
-            String content = getIntent().getStringExtra("content");
-
-            titleTv.setText(title);
-            contentTv.setText(content);
+            titleTv.setText(note.getTitle());
+            contentTv.setText(note.getContent());
+            String editedDate = note.getEdited_date();
+            if (editedDate != null)
+                dateTv.setText(editedDate);
+            else
+                dateTv.setText(note.getCreate_date());
         }
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.icons_edit_note, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -72,21 +99,24 @@ public class EditNoteActivity extends AppCompatActivity {
         if (title.isEmpty() && content.isEmpty())
             return;
 
-        Note note = new Note();
+        note = new Note();
         note.setTitle(title);
         note.setContent(content);
 
-        id = (int) NoteDao.insertRecord(note);
+        NoteDao.insertRecord(note);
     }
 
     private void updateNote() {
         String title = titleTv.getText().toString();
         String content = contentTv.getText().toString();
 
-        Note note = NoteDao.loadRecordById(id);
+        String orig = note.toString();
         note.setTitle(title);
         note.setContent(content);
 
-        NoteDao.updateRecord(note);
+        if (!orig.equals(note.toString())) {
+            note.setEdited_date(Utils.getCurrentDateTime());
+            NoteDao.updateRecord(note);
+        }
     }
 }

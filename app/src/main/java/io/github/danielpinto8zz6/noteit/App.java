@@ -5,7 +5,7 @@ import android.content.Context;
 
 import io.github.danielpinto8zz6.noteit.notes.DbManager;
 
-class App extends Application {
+public class App extends Application {
     private static Context context;
 
     @Override

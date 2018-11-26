@@ -4,19 +4,32 @@ import android.graphics.Bitmap;
 
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-class Utils {
+public class Utils {
     public static byte[] getBitmapAsByteArray(Bitmap bitmap) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
         return outputStream.toByteArray();
     }
 
-    private static String getDateTime(Date date) {
+    public static String getDateTime(Date date) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         return dateFormat.format(date);
+    }
+
+    public static String getFormatedDateTime(Date date, String format) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                format, Locale.getDefault());
+        return dateFormat.format(date);
+    }
+
+    public static String getCurrentDateTime() {
+        Date currentTime = Calendar.getInstance().getTime();
+        return getDateTime(currentTime);
+
     }
 }

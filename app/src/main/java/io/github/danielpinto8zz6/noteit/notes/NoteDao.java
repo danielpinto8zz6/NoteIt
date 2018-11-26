@@ -149,8 +149,9 @@ public class NoteDao extends DbManager {
         values.put(DbSchema.Table_Note.COL_ID, note.getId());
         values.put(DbSchema.Table_Note.COL_TITLE, note.getTitle());
         values.put(DbSchema.Table_Note.COL_CONTENT, note.getContent());
-        values.put(DbSchema.Table_Note.COL_CREATE_DATE, note.getCreate_date());
+//        values.put(DbSchema.Table_Note.COL_CREATE_DATE, note.getCreate_date());
         values.put(DbSchema.Table_Note.COL_NOTIFY_DATE, note.getNotify_date());
+        values.put(DbSchema.Table_Note.COL_EDITED_DATE, note.getEdited_date());
         values.put(DbSchema.Table_Note.COL_COLOR, note.getColor());
         values.put(DbSchema.Table_Note.COL_STATUS, note.getStatus());
         values.put(DbSchema.Table_Note.COL_IMAGE, note.getImage());
@@ -166,6 +167,7 @@ public class NoteDao extends DbManager {
         note.setContent(cursor.getString(cursor.getColumnIndex(DbSchema.Table_Note.COL_CONTENT)));
         note.setCreate_date(cursor.getString(cursor.getColumnIndex(DbSchema.Table_Note.COL_CREATE_DATE)));
         note.setNotify_date(cursor.getString(cursor.getColumnIndex(DbSchema.Table_Note.COL_NOTIFY_DATE)));
+        note.setEdited_date(cursor.getString(cursor.getColumnIndex(DbSchema.Table_Note.COL_EDITED_DATE)));
         note.setColor(cursor.getString(cursor.getColumnIndex(DbSchema.Table_Note.COL_COLOR)));
         note.setStatus(cursor.getInt(cursor.getColumnIndex(DbSchema.Table_Note.COL_STATUS)));
         note.setImage(cursor.getString(cursor.getColumnIndex(DbSchema.Table_Note.COL_IMAGE)));

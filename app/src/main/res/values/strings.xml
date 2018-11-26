@@ -13,4 +13,13 @@
     <string name="layout">Layout</string>
     <string name="delete">Delete</string>
     <string name="delete_confirmation">Are you sure you wanna delete?</string>
+    <string name="archive">Archive</string>
+    <string name="note_archived">Note archived</string>
+    <string name="notes">Notes</string>
+    <string name="add_alert">Add alert</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="add">Add</string>
 </resources>

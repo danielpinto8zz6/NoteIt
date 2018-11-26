@@ -18,25 +18,19 @@ import java.util.List;
 import io.github.danielpinto8zz6.noteit.R;
 import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;
+import io.github.danielpinto8zz6.noteit.notes.NotesManager;
 
-import static io.github.danielpinto8zz6.noteit.Constants.STATUS_FILED;
+import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ARCHIVED;
 
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
     private final Activity activity;
-    private List<Note> notes;
-
-    private Note mRecentlyFiledItem;
-    private int mRecentlyFiledItemPosition;
 
     private List<Integer> selectedIds = new ArrayList<>();
+    private NotesManager notes;
 
-    public NotesAdapter(List<Note> notes, Activity activity) {
+    public NotesAdapter(NotesManager notes, Activity activity) {
         this.notes = notes;
         this.activity = activity;
-    }
-
-    public void setNotes (List<Note> notes) {
-        this.notes = notes;
     }
 
     @Override
@@ -59,13 +53,12 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
         int id = note.getId();
 
-        if (selectedIds.contains(id)){
+        if (selectedIds.contains(id)) {
             //if item is selected then,set foreground color of FrameLayout.
-            holder.rootView.setForeground(new ColorDrawable(ContextCompat.getColor(activity,R.color.colorControlActivated)));
-        }
-        else {
+            holder.rootView.setForeground(new ColorDrawable(ContextCompat.getColor(activity, R.color.colorControlActivated)));
+        } else {
             //else remove selected item color.
-            holder.rootView.setForeground(new ColorDrawable(ContextCompat.getColor(activity,android.R.color.transparent)));
+            holder.rootView.setForeground(new ColorDrawable(ContextCompat.getColor(activity, android.R.color.transparent)));
         }
     }
 
@@ -74,41 +67,13 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         return notes.size();
     }
 
-    public Note getItem(int position){
+    public Note getItem(int position) {
         return notes.get(position);
     }
 
     public void setSelectedIds(List<Integer> selectedIds) {
         this.selectedIds = selectedIds;
         notifyDataSetChanged();
-    }
-
-    public void fileItem(int position) {
-        mRecentlyFiledItem = notes.get(position);
-        mRecentlyFiledItemPosition = position;
-        Note note = notes.get(position);
-        note.setStatus(STATUS_FILED);
-        NoteDao.updateRecord(note);
-        notes.remove(notes.get(position));
-        notifyItemRemoved(position);
-        showUndoSnackbar();
-    }
-
-    private void showUndoSnackbar() {
-        View view = activity.findViewById(R.id.drawer_layout);
-        final Snackbar snackbar = Snackbar.make(view, R.string.note_filed,
-                Snackbar.LENGTH_LONG);
-        snackbar.setAction(R.string.snack_bar_undo, v -> {
-            undoFile();
-            snackbar.dismiss();
-        });
-        snackbar.show();
-    }
-
-    private void undoFile() {
-        notes.add(mRecentlyFiledItemPosition,
-                mRecentlyFiledItem);
-        notifyItemInserted(mRecentlyFiledItemPosition);
     }
 
     public class NotesViewHolder extends RecyclerView.ViewHolder {
