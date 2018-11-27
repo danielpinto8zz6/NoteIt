@@ -402,6 +402,6 @@ public class MainActivity extends AppCompatActivity
         editor.putInt("recycler_layout", (recyclerView.getLayoutManager() == listLayout) ? 0 : 1);
         editor.apply();
 
-        super.onDestroy();
+        super.onStop();
     }
 }

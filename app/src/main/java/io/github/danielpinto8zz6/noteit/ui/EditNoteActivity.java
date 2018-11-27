@@ -1,15 +1,24 @@
 package io.github.danielpinto8zz6.noteit.ui;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.kunzisoft.switchdatetime.SwitchDateTimeDialogFragment;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Objects;
+import java.util.TimeZone;
 
 import io.github.danielpinto8zz6.noteit.R;
 import io.github.danielpinto8zz6.noteit.Utils;
@@ -20,12 +29,17 @@ import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ACTIVE;
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ARCHIVED;
 
 public class EditNoteActivity extends AppCompatActivity {
+    private static final String TAG = "NoteIt";
+    private static final String TAG_DATETIME_FRAGMENT = "TAG_DATETIME_FRAGMENT";
+
     private Note note;
     private boolean editing = false;
     private boolean force = false;
     private TextView titleTv;
     private TextView contentTv;
     private TextView dateTv;
+
+    private SwitchDateTimeDialogFragment dateTimeFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +48,6 @@ public class EditNoteActivity extends AppCompatActivity {
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setElevation(0);
 
         titleTv = findViewById(R.id.note_title_input);
         contentTv = findViewById(R.id.note_content_input);
@@ -55,7 +68,49 @@ public class EditNoteActivity extends AppCompatActivity {
                 dateTv.setText(editedDate);
             else
                 dateTv.setText(note.getCreate_date());
+        } else {
+            note = new Note();
         }
+
+        // Construct SwitchDateTimePicker
+        dateTimeFragment = (SwitchDateTimeDialogFragment) getSupportFragmentManager().findFragmentByTag(TAG_DATETIME_FRAGMENT);
+        if (dateTimeFragment == null) {
+            dateTimeFragment = SwitchDateTimeDialogFragment.newInstance(
+                    getString(R.string.label_datetime_dialog),
+                    getString(android.R.string.ok),
+                    getString(android.R.string.cancel)
+            );
+        }
+
+        dateTimeFragment.setTimeZone(TimeZone.getDefault());
+        dateTimeFragment.set24HoursMode(true);
+        dateTimeFragment.setMinimumDateTime(Calendar.getInstance().getTime());
+        dateTimeFragment.setMaximumDateTime(new GregorianCalendar(2025, Calendar.DECEMBER, 31).getTime());
+
+        // Set listener for date
+        // Or use dateTimeFragment.setOnButtonClickListener(new SwitchDateTimeDialogFragment.OnButtonClickListener() {
+        dateTimeFragment.setOnButtonClickListener(new SwitchDateTimeDialogFragment.OnButtonWithNeutralClickListener() {
+            @Override
+            public void onPositiveButtonClick(Date date) {
+                Log.d(TAG, Utils.getDateTime(date));
+                note.setNotify_date(Utils.getDateTime(date));
+                setReminder(date);
+            }
+
+            @Override
+            public void onNegativeButtonClick(Date date) {
+                // Do nothing
+            }
+
+            @Override
+            public void onNeutralButtonClick(Date date) {
+            }
+        });
+
+    }
+
+    private void setReminder(Date date) {
+        // TODO
     }
 
 
@@ -99,6 +154,9 @@ public class EditNoteActivity extends AppCompatActivity {
                     })
                     .setNegativeButton(android.R.string.no, null).show();
         } else if (id == R.id.action_add_alert) {
+            dateTimeFragment.startAtCalendarView();
+            dateTimeFragment.setDefaultDateTime(Calendar.getInstance().getTime());
+            dateTimeFragment.show(getSupportFragmentManager(), TAG_DATETIME_FRAGMENT);
         } else if (id == R.id.action_unarchive) {
             note.setStatus(STATUS_ACTIVE);
             force = true;
@@ -141,7 +199,6 @@ public class EditNoteActivity extends AppCompatActivity {
         if (title.isEmpty() && content.isEmpty())
             return;
 
-        note = new Note();
         note.setTitle(title);
         note.setContent(content);
 
