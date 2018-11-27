@@ -1,7 +1,5 @@
 package io.github.danielpinto8zz6.noteit.ui;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.evernote.android.job.JobRequest;
 import com.kunzisoft.switchdatetime.SwitchDateTimeDialogFragment;
 
 import java.util.Calendar;
@@ -19,11 +18,13 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import io.github.danielpinto8zz6.noteit.R;
 import io.github.danielpinto8zz6.noteit.Utils;
 import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;
+import io.github.danielpinto8zz6.noteit.notification.ShowNotificationJob;
 
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ACTIVE;
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ARCHIVED;
@@ -110,7 +111,11 @@ public class EditNoteActivity extends AppCompatActivity {
     }
 
     private void setReminder(Date date) {
-        // TODO
+        new JobRequest.Builder(ShowNotificationJob.TAG)
+                .setPeriodic(TimeUnit.MINUTES.toMillis(15), TimeUnit.MINUTES.toMillis(5))
+                .setUpdateCurrent(true)
+                .build()
+                .schedule();
     }
 
 
