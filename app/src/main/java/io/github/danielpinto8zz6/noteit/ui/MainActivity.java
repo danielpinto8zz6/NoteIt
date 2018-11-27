@@ -2,7 +2,9 @@ package io.github.danielpinto8zz6.noteit.ui;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -54,10 +56,13 @@ public class MainActivity extends AppCompatActivity
     private Note recentlyArchivedNote;
     private int recentlyArchivedNotePosition;
 
+    private SharedPreferences preferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -86,6 +91,8 @@ public class MainActivity extends AppCompatActivity
         navigationView.getMenu().getItem(0).setChecked(true);
 
         notes = new NotesManager();
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         String msg = "123456";
         String keyStr = "abcdef";
@@ -133,7 +140,12 @@ public class MainActivity extends AppCompatActivity
         gridLayout = new GridLayoutManager(this,
                 2);
 
-        recyclerView.setLayoutManager(gridLayout);
+        int layout = preferences.getInt("recycler_layout", 0);
+
+        if (layout == 0)
+            recyclerView.setLayoutManager(listLayout);
+        else
+            recyclerView.setLayoutManager(gridLayout);
 
         // Getting SwipeContainerLayout
         swipeLayout = findViewById(R.id.swipe_container);
@@ -382,5 +394,14 @@ public class MainActivity extends AppCompatActivity
         isMultiSelect = false;
         selectedIds = new ArrayList<>();
         notesAdapter.setSelectedIds(new ArrayList<Integer>());
+    }
+
+    @Override
+    public void onStop() {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt("recycler_layout", (recyclerView.getLayoutManager() == listLayout) ? 0 : 1);
+        editor.apply();
+
+        super.onDestroy();
     }
 }

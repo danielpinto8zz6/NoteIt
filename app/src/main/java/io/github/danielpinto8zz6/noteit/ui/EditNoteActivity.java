@@ -1,7 +1,9 @@
 package io.github.danielpinto8zz6.noteit.ui;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,11 +18,11 @@ import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ACTIVE;
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ARCHIVED;
-import static io.github.danielpinto8zz6.noteit.Constants.STATUS_DELETED;
 
 public class EditNoteActivity extends AppCompatActivity {
     private Note note;
     private boolean editing = false;
+    private boolean force = false;
     private TextView titleTv;
     private TextView contentTv;
     private TextView dateTv;
@@ -64,6 +66,8 @@ public class EditNoteActivity extends AppCompatActivity {
 
         if (note != null && note.getStatus() != STATUS_ACTIVE) {
             menu.findItem(R.id.action_archive).setVisible(false);
+        } else {
+            menu.findItem(R.id.action_unarchive).setVisible(false);
         }
 
         return true;
@@ -77,11 +81,29 @@ public class EditNoteActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_archive) {
-            // TODO: archive, delete
             note.setStatus(STATUS_ARCHIVED);
+            force = true;
+            NoteDao.updateRecord(note);
+            finish();
         } else if (id == R.id.action_delete) {
-            note.setStatus(STATUS_DELETED);
+            new AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.delete))
+                    .setMessage(getString(R.string.delete_confirmation))
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            NoteDao.deleteRecord(note);
+                            force = true;
+                            finish();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, null).show();
         } else if (id == R.id.action_add_alert) {
+        } else if (id == R.id.action_unarchive) {
+            note.setStatus(STATUS_ACTIVE);
+            force = true;
+            NoteDao.updateRecord(note);
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -100,11 +122,13 @@ public class EditNoteActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        if (editing) {
-            updateNote();
-        } else {
-            addNote();
-            editing = true;
+        if (!force) {
+            if (editing) {
+                updateNote();
+            } else {
+                addNote();
+                editing = true;
+            }
         }
 
         super.onPause();
