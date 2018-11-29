@@ -3,6 +3,7 @@ package io.github.danielpinto8zz6.noteit.ui;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -27,10 +28,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.kizitonwose.colorpreference.ColorDialog;
+import com.kizitonwose.colorpreference.ColorShape;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
 import io.github.danielpinto8zz6.noteit.R;
+import io.github.danielpinto8zz6.noteit.Utils;
 import io.github.danielpinto8zz6.noteit.encryption.AESHelper;
 import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;
@@ -40,7 +45,7 @@ import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ACTIVE;
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ARCHIVED;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, ActionMode.Callback {
+        implements NavigationView.OnNavigationItemSelectedListener, ActionMode.Callback, ColorDialog.OnColorSelectedListener {
     private SwipeRefreshLayout swipeLayout;
     private RecyclerView.LayoutManager listLayout;
     private RecyclerView.LayoutManager gridLayout;
@@ -156,6 +161,7 @@ public class MainActivity extends AppCompatActivity
             swipeLayout.setRefreshing(false);
         });
     }
+
 
     @Override
     protected void onResume() {
@@ -339,6 +345,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_palette:
+                new ColorDialog.Builder(this)
+                        .setColorShape(ColorShape.CIRCLE) //CIRCLE or SQUARE
+                        .setColorChoices(R.array.color_choices) //an array of colors
+                        .setSelectedColor(Color.GREEN) //the checked color
+                        .setTag("TAG") // tags can be useful when multiple components use the picker within an activity
+                        .show();
+                break;
             case R.id.action_delete:
                 new AlertDialog.Builder(this)
                         .setTitle(getString(R.string.delete))
@@ -403,5 +417,24 @@ public class MainActivity extends AppCompatActivity
         editor.apply();
 
         super.onStop();
+    }
+
+    @Override
+    public void onColorSelected(int i, String s) {
+        String color = Utils.getColorHex(i);
+
+        for (int id : selectedIds) {
+            Note note = NoteDao.loadRecordById(id);
+            note.setColor(color);
+            NoteDao.updateRecord(note);
+        }
+
+        notes.refresh();
+
+        if (actionMode != null)
+            actionMode.finish();
+
+        selectedIds.clear();
+        notesAdapter.notifyDataSetChanged();
     }
 }

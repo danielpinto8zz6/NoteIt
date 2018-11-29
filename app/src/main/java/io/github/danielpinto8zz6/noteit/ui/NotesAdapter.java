@@ -1,9 +1,9 @@
 package io.github.danielpinto8zz6.noteit.ui;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -17,10 +17,7 @@ import java.util.List;
 
 import io.github.danielpinto8zz6.noteit.R;
 import io.github.danielpinto8zz6.noteit.notes.Note;
-import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 import io.github.danielpinto8zz6.noteit.notes.NotesManager;
-
-import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ARCHIVED;
 
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
     private final Activity activity;
@@ -50,6 +47,13 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
         holder.title.setText(note.getTitle());
         holder.content.setText(note.getContent());
+
+        String color = note.getColor();
+        if (color != null && color != "") {
+            holder.rootView.setBackgroundColor(Color.parseColor(color));
+        } else {
+            holder.rootView.setBackgroundColor(Color.WHITE);
+        }
 
         int id = note.getId();
 

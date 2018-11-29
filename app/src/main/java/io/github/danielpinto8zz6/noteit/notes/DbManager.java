@@ -3,6 +3,7 @@ package io.github.danielpinto8zz6.noteit.notes;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DbManager {
     private static final String TAG = "DBMANAGER";
@@ -28,7 +29,6 @@ public class DbManager {
         return sInstance;
     }
 
-
     private DbManager(Context ctx) {
         this.mCtx = ctx;
     }
@@ -36,6 +36,7 @@ public class DbManager {
     DbManager() {}
 
     public DbManager open() {
+        Log.d("Note it", "DAMN");
         mDbHelper = new DbHelper(this);
         mDb = mDbHelper.getWritableDatabase();
         return this;
@@ -63,7 +64,6 @@ public class DbManager {
             }
             return sInstance;
         }
-
 
         private DbHelper(DbManager dbmanger) {
             super(dbmanger.mCtx, DbSchema.DATABASE_NAME, null, DbSchema.DATABASE_VERSION);

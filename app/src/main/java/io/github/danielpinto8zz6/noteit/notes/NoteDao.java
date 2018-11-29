@@ -16,7 +16,6 @@ public class NoteDao extends DbManager {
     private static DbManager mDbManager;
     private static final String[] allColumns = DbSchema.Table_Note.allColumns;
 
-
     protected NoteDao() {
     }
 

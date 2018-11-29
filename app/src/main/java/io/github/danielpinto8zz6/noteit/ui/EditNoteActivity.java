@@ -2,15 +2,21 @@ package io.github.danielpinto8zz6.noteit.ui;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.evernote.android.job.JobRequest;
+import com.kizitonwose.colorpreference.ColorDialog;
+import com.kizitonwose.colorpreference.ColorShape;
 import com.kunzisoft.switchdatetime.SwitchDateTimeDialogFragment;
 
 import java.util.Calendar;
@@ -18,18 +24,17 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Objects;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 import io.github.danielpinto8zz6.noteit.R;
 import io.github.danielpinto8zz6.noteit.Utils;
 import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;
-import io.github.danielpinto8zz6.noteit.notification.ShowNotificationJob;
+import io.github.danielpinto8zz6.noteit.notification.NotificationHelper;
 
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ACTIVE;
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ARCHIVED;
 
-public class EditNoteActivity extends AppCompatActivity {
+public class EditNoteActivity extends AppCompatActivity implements ColorDialog.OnColorSelectedListener {
     private static final String TAG = "NoteIt";
     private static final String TAG_DATETIME_FRAGMENT = "TAG_DATETIME_FRAGMENT";
 
@@ -39,6 +44,7 @@ public class EditNoteActivity extends AppCompatActivity {
     private TextView titleTv;
     private TextView contentTv;
     private TextView dateTv;
+    private boolean notify = false;
 
     private SwitchDateTimeDialogFragment dateTimeFragment;
 
@@ -69,6 +75,11 @@ public class EditNoteActivity extends AppCompatActivity {
                 dateTv.setText(editedDate);
             else
                 dateTv.setText(note.getCreate_date());
+
+            String color = note.getColor();
+            if (color != null) {
+                setToolbarColor(Color.parseColor(color));
+            }
         } else {
             note = new Note();
         }
@@ -95,7 +106,7 @@ public class EditNoteActivity extends AppCompatActivity {
             public void onPositiveButtonClick(Date date) {
                 Log.d(TAG, Utils.getDateTime(date));
                 note.setNotify_date(Utils.getDateTime(date));
-                setReminder(date);
+                notify = true;
             }
 
             @Override
@@ -109,15 +120,6 @@ public class EditNoteActivity extends AppCompatActivity {
         });
 
     }
-
-    private void setReminder(Date date) {
-        new JobRequest.Builder(ShowNotificationJob.TAG)
-                .setPeriodic(TimeUnit.MINUTES.toMillis(15), TimeUnit.MINUTES.toMillis(5))
-                .setUpdateCurrent(true)
-                .build()
-                .schedule();
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -140,7 +142,14 @@ public class EditNoteActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.action_archive) {
+        if (id == R.id.action_palette) {
+            new ColorDialog.Builder(this)
+                    .setColorShape(ColorShape.CIRCLE) //CIRCLE or SQUARE
+                    .setColorChoices(R.array.color_choices) //an array of colors
+                    .setSelectedColor(Color.GREEN) //the checked color
+                    .setTag("TAG") // tags can be useful when multiple components use the picker within an activity
+                    .show();
+        } else if (id == R.id.action_archive) {
             note.setStatus(STATUS_ARCHIVED);
             force = true;
             NoteDao.updateRecord(note);
@@ -192,6 +201,12 @@ public class EditNoteActivity extends AppCompatActivity {
                 addNote();
                 editing = true;
             }
+            if (notify && note.getId() != null) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(Utils.getDateFromString(note.getNotify_date()));
+                NotificationHelper.setNotification(getApplicationContext(), cal.getTimeInMillis(), note.getId());
+                notify = false;
+            }
         }
 
         super.onPause();
@@ -206,8 +221,7 @@ public class EditNoteActivity extends AppCompatActivity {
 
         note.setTitle(title);
         note.setContent(content);
-
-        NoteDao.insertRecord(note);
+        note.setId((int) NoteDao.insertRecord(note));
     }
 
     private void updateNote() {
@@ -220,7 +234,24 @@ public class EditNoteActivity extends AppCompatActivity {
 
         if (!orig.equals(note.toString())) {
             note.setEdited_date(Utils.getCurrentDateTime());
-            NoteDao.updateRecord(note);
         }
+
+        NoteDao.updateRecord(note);
+    }
+
+    @Override
+    public void onColorSelected(int i, String s) {
+        String color = Utils.getColorHex(i);
+        note.setColor(color);
+
+        setToolbarColor(i);
+    }
+
+    private void setToolbarColor(int c) {
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(c));
+
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        getWindow().setStatusBarColor(c);
+
     }
 }

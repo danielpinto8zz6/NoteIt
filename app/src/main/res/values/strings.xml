@@ -23,4 +23,7 @@
     <string name="title_notifications">Notifications</string>
     <string name="add">Add</string>
     <string name="unarchive">Unarchive</string>
+    <string name="you_have_notification">You have a reminder</string>
+    <string name="check_your_notes">Check your notes</string>
+    <string name="palette">Pallete</string>
 </resources>

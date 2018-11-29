@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.github.danielpinto8zz6.noteit">
-
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -24,6 +23,8 @@
         <activity
             android:name=".ui.EditNoteActivity"
             android:windowSoftInputMode="adjustResize" />
+
+        <receiver android:name=".notification.AlarmReceiver"/>
     </application>
 
 </manifest>

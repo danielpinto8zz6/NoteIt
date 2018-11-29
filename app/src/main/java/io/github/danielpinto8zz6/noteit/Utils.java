@@ -1,8 +1,10 @@
 package io.github.danielpinto8zz6.noteit;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 
 import java.io.ByteArrayOutputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,5 +33,22 @@ public class Utils {
         Date currentTime = Calendar.getInstance().getTime();
         return getDateTime(currentTime);
 
+    }
+
+    public static Date getDateFromString(String dateStr) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        try {
+            Date date = dateFormat.parse(dateStr);
+            return date;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static String getColorHex(int color) {
+        return String.format("#%02x%02x%02x", Color.red(color), Color.green(color), Color.blue(color));
     }
 }

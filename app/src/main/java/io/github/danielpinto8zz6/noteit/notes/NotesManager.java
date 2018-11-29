@@ -68,8 +68,8 @@ public class NotesManager {
         archived.clear();
 
         notes = NoteDao.loadAllRecords();
-        active = NoteDao.loadAllRecords("status = ?", new String[]{"0"}, null, null, null);
-        archived = NoteDao.loadAllRecords("status = ?", new String[]{"1"}, null, null, null);
+        active = NoteDao.loadAllRecords("status = ?", new String[]{"0"}, null, null, "create_date desc");
+        archived = NoteDao.loadAllRecords("status = ?", new String[]{"1"}, null, null, "create_date desc");
     }
 
     public int getMode() {
