@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -51,9 +52,9 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
         String color = note.getColor();
         if (color != null && !Objects.equals(color, "")) {
-            notesViewHolder.rootView.setBackgroundColor(Color.parseColor(color));
+            notesViewHolder.color.setBackgroundColor(Color.parseColor(color));
         } else {
-            notesViewHolder.rootView.setBackgroundColor(Color.WHITE);
+            notesViewHolder.color.setBackgroundColor(Color.WHITE);
         }
 
         int id = note.getId();
@@ -85,6 +86,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         final CardView rootView;
         final TextView title;
         final TextView content;
+        final ImageView color;
 
         NotesViewHolder(View view) {
             super(view);
@@ -92,6 +94,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             title = view.findViewById(R.id.item_note_title);
             content = view.findViewById(R.id.item_note_content);
             rootView = view.findViewById(R.id.root_view);
+            color = view.findViewById(R.id.item_note_color);
         }
     }
 }
