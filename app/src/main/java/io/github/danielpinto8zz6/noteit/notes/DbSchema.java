@@ -27,6 +27,7 @@ class DbSchema {
         public static final String COL_COLOR = "color";
         public static final String COL_STATUS = "status";
         public static final String COL_IMAGE = "image";
+        public static final String COL_TYPE = "type";
 
         // Create Table Statement
         public static final String CREATE_TABLE = "CREATE TABLE notes ( " +
@@ -38,7 +39,8 @@ class DbSchema {
                 COL_EDITED_DATE + " DATETIME," +
                 COL_COLOR + " TEXT," +
                 COL_STATUS + " INTEGER DEFAULT 0," +
-                COL_IMAGE + " TEXT );";
+                COL_IMAGE + " TEXT," +
+                COL_TYPE + " INTEGER DEFAULT 0);";
 
         // Drop table statement
         public static final String DROP_TABLE = "DROP TABLE IF EXISTS note;";
@@ -53,7 +55,8 @@ class DbSchema {
                 COL_EDITED_DATE,
                 COL_COLOR,
                 COL_STATUS,
-                COL_IMAGE};
+                COL_IMAGE,
+                COL_TYPE};
     }
 
 }

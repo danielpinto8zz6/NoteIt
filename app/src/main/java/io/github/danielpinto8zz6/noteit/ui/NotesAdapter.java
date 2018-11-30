@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import io.github.danielpinto8zz6.noteit.R;
 import io.github.danielpinto8zz6.noteit.notes.Note;
@@ -30,8 +31,9 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         this.activity = activity;
     }
 
+    @NonNull
     @Override
-    public NotesViewHolder onCreateViewHolder(ViewGroup parent,
+    public NotesViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
                                               int viewType) {
         View view = LayoutInflater.from(activity)
                 .inflate(R.layout.item_note, parent, false);
@@ -41,28 +43,27 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
     @Override
     public void onBindViewHolder(@NonNull NotesViewHolder notesViewHolder, int i) {
-        NotesViewHolder holder = notesViewHolder;
 
         Note note = notes.get(i);
 
-        holder.title.setText(note.getTitle());
-        holder.content.setText(note.getContent());
+        notesViewHolder.title.setText(note.getTitle());
+        notesViewHolder.content.setText(note.getContent());
 
         String color = note.getColor();
-        if (color != null && color != "") {
-            holder.rootView.setBackgroundColor(Color.parseColor(color));
+        if (color != null && !Objects.equals(color, "")) {
+            notesViewHolder.rootView.setBackgroundColor(Color.parseColor(color));
         } else {
-            holder.rootView.setBackgroundColor(Color.WHITE);
+            notesViewHolder.rootView.setBackgroundColor(Color.WHITE);
         }
 
         int id = note.getId();
 
         if (selectedIds.contains(id)) {
             //if item is selected then,set foreground color of FrameLayout.
-            holder.rootView.setForeground(new ColorDrawable(ContextCompat.getColor(activity, R.color.colorControlActivated)));
+            notesViewHolder.rootView.setForeground(new ColorDrawable(ContextCompat.getColor(activity, R.color.colorControlActivated)));
         } else {
             //else remove selected item color.
-            holder.rootView.setForeground(new ColorDrawable(ContextCompat.getColor(activity, android.R.color.transparent)));
+            notesViewHolder.rootView.setForeground(new ColorDrawable(ContextCompat.getColor(activity, android.R.color.transparent)));
         }
     }
 

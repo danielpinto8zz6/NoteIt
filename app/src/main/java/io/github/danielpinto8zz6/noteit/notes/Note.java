@@ -3,8 +3,7 @@ package io.github.danielpinto8zz6.noteit.notes;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.util.Objects;
+import android.support.annotation.NonNull;
 
 public class Note implements Parcelable {
     private static final String COL_ID = "id";
@@ -16,6 +15,7 @@ public class Note implements Parcelable {
     private static final String COL_COLOR = "color";
     private static final String COL_STATUS = "status";
     private static final String COL_IMAGE = "image";
+    private static final String COL_TYPE = "type";
 
     private Integer id;
     private String title;
@@ -29,10 +29,12 @@ public class Note implements Parcelable {
     private Integer status = 0;
     private String image;
 
+    private Integer type = 0;
+
     public Note() {
     }
 
-    public Note(Integer id, String title, String content, String create_date, String notify_date, String edited_date, String color, Integer status, String image) {
+    public Note(Integer id, String title, String content, String create_date, String notify_date, String edited_date, String color, Integer status, String image, Integer type) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -42,6 +44,7 @@ public class Note implements Parcelable {
         this.color = color;
         this.status = status;
         this.image = image;
+        this.type = type;
     }
 
     public Integer getId() {
@@ -116,6 +119,14 @@ public class Note implements Parcelable {
         this.edited_date = edited_date;
     }
 
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
     public Bundle toBundle() {
         Bundle b = new Bundle();
         b.putInt(COL_ID, this.id);
@@ -127,6 +138,7 @@ public class Note implements Parcelable {
         b.putString(COL_COLOR, this.color);
         b.putInt(COL_STATUS, this.status);
         b.putString(COL_IMAGE, this.image);
+        b.putInt(COL_TYPE, this.type);
         return b;
     }
 
@@ -141,9 +153,11 @@ public class Note implements Parcelable {
             this.color = b.getString(COL_COLOR);
             this.status = b.getInt(COL_STATUS);
             this.image = b.getString(COL_IMAGE);
+            this.type = b.getInt(COL_TYPE);
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Note{" +
@@ -156,6 +170,7 @@ public class Note implements Parcelable {
                 ", mcolor='" + color + '\'' +
                 ", mstatus=" + status +
                 ", mimage='" + image + '\'' +
+                ", type='" + type + '\'' +
                 '}';
     }
 
@@ -169,6 +184,7 @@ public class Note implements Parcelable {
         color = in.readString();
         status = in.readByte() == 0x00 ? null : in.readInt();
         image = in.readString();
+        type = in.readByte() == 0x00 ? null : in.readInt();
     }
 
     @Override
@@ -197,6 +213,12 @@ public class Note implements Parcelable {
             dest.writeInt(status);
         }
         dest.writeString(image);
+        if (type == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeInt(type);
+        }
     }
 
     @SuppressWarnings("unused")
@@ -211,26 +233,4 @@ public class Note implements Parcelable {
             return new Note[size];
         }
     };
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Note)) return false;
-        Note note = (Note) o;
-        return Objects.equals(id, note.id) &&
-                Objects.equals(title, note.title) &&
-                Objects.equals(content, note.content) &&
-                Objects.equals(create_date, note.create_date) &&
-                Objects.equals(notify_date, note.notify_date) &&
-                Objects.equals(edited_date, note.edited_date) &&
-                Objects.equals(color, note.color) &&
-                Objects.equals(status, note.status) &&
-                Objects.equals(image, note.image);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(id, title, content, create_date, notify_date, edited_date, color, status, image);
-    }
 }

@@ -39,8 +39,7 @@ public class Utils {
         SimpleDateFormat dateFormat = new SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         try {
-            Date date = dateFormat.parse(dateStr);
-            return date;
+            return dateFormat.parse(dateStr);
         } catch (ParseException e) {
             e.printStackTrace();
         }

@@ -5,13 +5,11 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -43,7 +41,6 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
     private boolean force = false;
     private TextView titleTv;
     private TextView contentTv;
-    private TextView dateTv;
     private boolean notify = false;
 
     private SwitchDateTimeDialogFragment dateTimeFragment;
@@ -58,12 +55,12 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
 
         titleTv = findViewById(R.id.note_title_input);
         contentTv = findViewById(R.id.note_content_input);
-        dateTv = findViewById(R.id.note_date);
+        TextView dateTv = findViewById(R.id.note_date);
 
         dateTv.setText(Utils.getCurrentDateTime());
 
         Intent intent = getIntent(); // gets the previously created intent
-        note = (Note) intent.getParcelableExtra("note");
+        note = intent.getParcelableExtra("note");
 
         if (note != null) {
             editing = true;
@@ -248,7 +245,7 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
     }
 
     private void setToolbarColor(int c) {
-        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(c));
+        Objects.requireNonNull(getSupportActionBar()).setBackgroundDrawable(new ColorDrawable(c));
 
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         getWindow().setStatusBarColor(c);

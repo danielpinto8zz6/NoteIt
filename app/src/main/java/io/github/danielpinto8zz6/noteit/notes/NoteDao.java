@@ -1,13 +1,13 @@
 package io.github.danielpinto8zz6.noteit.notes;
 
-import java.util.ArrayList;
-import java.util.Objects;
-
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
+
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class NoteDao extends DbManager {
     private static final String TAG = "NoteDao";
@@ -29,9 +29,9 @@ public class NoteDao extends DbManager {
         mDbManager.close();
     }
 
-    public static Note loadRecordById(int mid)  { 
+    public static Note loadRecordById(int mid) {
         database_open();
-        Cursor cursor = database.query(DbSchema.Table_Note.TABLE_NAME,allColumns,  "id = ?" , new String[] { String.valueOf(mid) } , null, null, null,null);
+        Cursor cursor = database.query(DbSchema.Table_Note.TABLE_NAME, allColumns, "id = ?", new String[]{String.valueOf(mid)}, null, null, null, null);
 
         if (cursor != null)
             cursor.moveToFirst();
@@ -75,7 +75,7 @@ public class NoteDao extends DbManager {
         ArrayList<Note> noteList = new ArrayList<Note>();
         database_open();
 
-        if(TextUtils.isEmpty(selection)){
+        if (TextUtils.isEmpty(selection)) {
             selection = null;
             selectionArgs = null;
         }
@@ -104,40 +104,40 @@ public class NoteDao extends DbManager {
         ContentValues values = new ContentValues();
         values = getNoteValues(note);
         database_open();
-        long insertId = database.insert(DbSchema.Table_Note.TABLE_NAME , null, values);
+        long insertId = database.insert(DbSchema.Table_Note.TABLE_NAME, null, values);
         database_close();
         return insertId;
     }
 
-    public static int updateRecord(Note note) { 
+    public static int updateRecord(Note note) {
         ContentValues values = new ContentValues();
         values = getNoteValues(note);
         database_open();
-        String[] where = new String[] { String.valueOf(note.getId()) };
-        int updatedId = database.update(DbSchema.Table_Note.TABLE_NAME , values, DbSchema.Table_Note.COL_ID + " = ? ",where );
+        String[] where = new String[]{String.valueOf(note.getId())};
+        int updatedId = database.update(DbSchema.Table_Note.TABLE_NAME, values, DbSchema.Table_Note.COL_ID + " = ? ", where);
         database_close();
         return updatedId;
     }
 
-    public static int deleteRecord(Note note) { 
+    public static int deleteRecord(Note note) {
         database_open();
-        String[] where = new String[] { String.valueOf(note.getId()) };
-        int deletedCount = database.delete(DbSchema.Table_Note.TABLE_NAME , DbSchema.Table_Note.COL_ID + " = ? ",where );
+        String[] where = new String[]{String.valueOf(note.getId())};
+        int deletedCount = database.delete(DbSchema.Table_Note.TABLE_NAME, DbSchema.Table_Note.COL_ID + " = ? ", where);
         database_close();
         return deletedCount;
     }
 
     public static int deleteRecord(String id) {
         database_open();
-        String[] where = new String[] { id }; 
-        int deletedCount = database.delete(DbSchema.Table_Note.TABLE_NAME , DbSchema.Table_Note.COL_ID + " = ? ",where );
+        String[] where = new String[]{id};
+        int deletedCount = database.delete(DbSchema.Table_Note.TABLE_NAME, DbSchema.Table_Note.COL_ID + " = ? ", where);
         database_close();
         return deletedCount;
     }
 
     public static int deleteAllRecords() {
         database_open();
-        int deletedCount = database.delete(DbSchema.Table_Note.TABLE_NAME , null, null );
+        int deletedCount = database.delete(DbSchema.Table_Note.TABLE_NAME, null, null);
         database_close();
         return deletedCount;
     }
@@ -154,11 +154,12 @@ public class NoteDao extends DbManager {
         values.put(DbSchema.Table_Note.COL_COLOR, note.getColor());
         values.put(DbSchema.Table_Note.COL_STATUS, note.getStatus());
         values.put(DbSchema.Table_Note.COL_IMAGE, note.getImage());
+        values.put(DbSchema.Table_Note.COL_TYPE, note.getType());
 
         return values;
     }
 
-    private static Note cursorToNote(Cursor cursor)  {
+    private static Note cursorToNote(Cursor cursor) {
         Note note = new Note();
 
         note.setId(cursor.getInt(cursor.getColumnIndex(DbSchema.Table_Note.COL_ID)));
@@ -170,11 +171,11 @@ public class NoteDao extends DbManager {
         note.setColor(cursor.getString(cursor.getColumnIndex(DbSchema.Table_Note.COL_COLOR)));
         note.setStatus(cursor.getInt(cursor.getColumnIndex(DbSchema.Table_Note.COL_STATUS)));
         note.setImage(cursor.getString(cursor.getColumnIndex(DbSchema.Table_Note.COL_IMAGE)));
+        note.setType(cursor.getInt(cursor.getColumnIndex(DbSchema.Table_Note.COL_TYPE)));
 
         return note;
     }
 
-    
 
 }
 

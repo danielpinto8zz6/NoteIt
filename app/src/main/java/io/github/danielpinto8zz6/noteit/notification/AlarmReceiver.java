@@ -27,6 +27,9 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         int id = intent.getIntExtra("id", -1);
 
+        if (id == -1)
+            return;
+
         Note note = NoteDao.loadRecordById(id);
 
         if (note == null || note.getStatus() != STATUS_ACTIVE) {

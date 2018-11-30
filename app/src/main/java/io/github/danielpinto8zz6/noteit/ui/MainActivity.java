@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -20,14 +21,16 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.Html;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
+import com.google.android.gms.drive.DriveId;
+import com.google.android.gms.drive.OpenFileActivityOptions;
 import com.kizitonwose.colorpreference.ColorDialog;
 import com.kizitonwose.colorpreference.ColorShape;
 
@@ -40,18 +43,19 @@ import io.github.danielpinto8zz6.noteit.encryption.AESHelper;
 import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;
 import io.github.danielpinto8zz6.noteit.notes.NotesManager;
+import io.github.danielpinto8zz6.noteit.sync.Sync;
 
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ACTIVE;
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ARCHIVED;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, ActionMode.Callback, ColorDialog.OnColorSelectedListener {
+    private static final String TAG = "NoteIt";
     private SwipeRefreshLayout swipeLayout;
     private RecyclerView.LayoutManager listLayout;
     private RecyclerView.LayoutManager gridLayout;
     private RecyclerView recyclerView;
     private NotesAdapter notesAdapter;
-    private Toolbar toolbar;
 
     private ActionMode actionMode;
     private boolean isMultiSelect = false;
@@ -63,12 +67,20 @@ public class MainActivity extends AppCompatActivity
 
     private SharedPreferences preferences;
 
+    private boolean isBackup = true;
+
+    private Sync sync;
+
+    public static final int REQUEST_CODE_SIGN_IN = 0;
+    public static final int REQUEST_CODE_OPENING = 1;
+    public static final int REQUEST_CODE_CREATION = 2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -160,6 +172,8 @@ public class MainActivity extends AppCompatActivity
             notesAdapter.notifyDataSetChanged();
             swipeLayout.setRefreshing(false);
         });
+
+        sync = new Sync(this);
     }
 
 
@@ -184,7 +198,7 @@ public class MainActivity extends AppCompatActivity
                         } else {
                             Note note = notes.get(position);
                             Intent intent = new Intent(getApplicationContext(), EditNoteActivity.class);
-                            intent.putExtra("note", (Note) note);
+                            intent.putExtra("note", note);
                             startActivity(intent);
                         }
                     }
@@ -205,9 +219,8 @@ public class MainActivity extends AppCompatActivity
                 })
         );
         ItemTouchHelper itemTouchHelper = new
-                ItemTouchHelper(new SwipeToDeleteCallback(this, (NotesAdapter) recyclerView.getAdapter()));
+                ItemTouchHelper(new SwipeToDeleteCallback(this));
         itemTouchHelper.attachToRecyclerView(recyclerView);
-
     }
 
     private void multiSelect(int position) {
@@ -215,7 +228,7 @@ public class MainActivity extends AppCompatActivity
         if (note != null) {
             if (actionMode != null) {
                 if (selectedIds.contains(note.getId()))
-                    selectedIds.remove(Integer.valueOf(note.getId()));
+                    selectedIds.remove(note.getId());
                 else
                     selectedIds.add(note.getId());
 
@@ -237,15 +250,21 @@ public class MainActivity extends AppCompatActivity
         Note note = notes.get(position);
         note.setStatus(STATUS_ARCHIVED);
         NoteDao.updateRecord(note);
-        notes.getAll().remove(notes.get(position));
-        notesAdapter.notifyItemRemoved(position);
+        notes.refresh();
+        notesAdapter.notifyDataSetChanged();
         showUndoSnackbar();
+    }
+
+    public void deleteItem(int position) {
+        Note note = notes.get(position);
+        NoteDao.deleteRecord(note);
+        notes.refresh();
+        notesAdapter.notifyDataSetChanged();
     }
 
     private void showUndoSnackbar() {
         View view = findViewById(R.id.drawer_layout);
-        final Snackbar snackbar = Snackbar.make(view, Html.fromHtml("<font color=\"#ffffff\">" + R.string.note_archived + "</font>"),
-                Snackbar.LENGTH_LONG);
+        final Snackbar snackbar = Snackbar.make(view, R.string.note_archived, Snackbar.LENGTH_LONG);
         snackbar.setAction(R.string.snack_bar_undo, v -> {
             undoArchive();
             snackbar.dismiss();
@@ -286,17 +305,26 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (id == R.id.action_change_layout) {
-            if (recyclerView.getLayoutManager() == listLayout) {
-                recyclerView.setLayoutManager(gridLayout);
-                item.setIcon(R.drawable.ic_grid);
-            } else {
-                recyclerView.setLayoutManager(listLayout);
-                item.setIcon(R.drawable.ic_list);
-            }
+        switch (id) {
+            case R.id.action_backup_Drive:
+                isBackup = true;
+                sync.connectToDrive(true);
+                break;
+            case R.id.action_import_Drive:
+                isBackup = false;
+                sync.connectToDrive(false);
+                break;
+            case R.id.action_change_layout:
+                if (recyclerView.getLayoutManager() == listLayout) {
+                    recyclerView.setLayoutManager(gridLayout);
+                    item.setIcon(R.drawable.ic_grid);
+                } else {
+                    recyclerView.setLayoutManager(listLayout);
+                    item.setIcon(R.drawable.ic_list);
+                }
+                break;
+            default:
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -304,7 +332,7 @@ public class MainActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
@@ -437,4 +465,46 @@ public class MainActivity extends AppCompatActivity
         selectedIds.clear();
         notesAdapter.notifyDataSetChanged();
     }
+
+    public int getMode() {
+        return notes.getMode();
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        switch (requestCode) {
+
+            case REQUEST_CODE_SIGN_IN:
+                Log.i(TAG, "Sign in request code");
+                // Called after user is signed in.
+                if (resultCode == RESULT_OK) {
+                    sync.connectToDrive(isBackup);
+                }
+                break;
+
+            case REQUEST_CODE_CREATION:
+                // Called after a file is saved to Drive.
+                if (resultCode == RESULT_OK) {
+                    Log.i(TAG, "Backup successfully saved.");
+                    Toast.makeText(this, getString(R.string.backup_successfully), Toast.LENGTH_SHORT).show();
+                }
+                break;
+
+            case REQUEST_CODE_OPENING:
+                if (resultCode == RESULT_OK) {
+                    DriveId driveId = data.getParcelableExtra(
+                            OpenFileActivityOptions.EXTRA_RESPONSE_DRIVE_ID);
+                    sync.mOpenItemTaskSource.setResult(driveId);
+                } else {
+                    sync.mOpenItemTaskSource.setException(new RuntimeException("Unable to open file"));
+                }
+
+        }
+    }
+
+    public void refresh() {
+        notes.refresh();
+        notesAdapter.notifyDataSetChanged();
+    }
+
 }
