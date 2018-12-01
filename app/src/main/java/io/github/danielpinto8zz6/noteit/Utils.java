@@ -1,9 +1,15 @@
 package io.github.danielpinto8zz6.noteit;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Environment;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -49,5 +55,32 @@ public class Utils {
 
     public static String getColorHex(int color) {
         return String.format("#%02x%02x%02x", Color.red(color), Color.green(color), Color.blue(color));
+    }
+
+    public static boolean exportDB(Context context) {
+        String DATABASE_NAME = "NoteIt.db";
+        String databasePath = context.getDatabasePath(DATABASE_NAME).getPath();
+        String inFileName = databasePath;
+        try {
+            File dbFile = new File(inFileName);
+            FileInputStream fis = new FileInputStream(dbFile);
+
+            String outFileName = Environment.getExternalStorageDirectory() + "/" + DATABASE_NAME;
+
+            OutputStream output = new FileOutputStream(outFileName);
+
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = fis.read(buffer)) > 0) {
+                output.write(buffer, 0, length);
+            }
+            //Close the streams
+            output.flush();
+            output.close();
+            fis.close();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

@@ -10,7 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -57,6 +57,14 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             notesViewHolder.color.setBackgroundColor(Color.WHITE);
         }
 
+        String notifyDate = note.getNotify_date();
+        if (notifyDate != null) {
+            notesViewHolder.notify_date.setText(note.getNotify_date());
+            notesViewHolder.notify_date.setVisibility(View.VISIBLE);
+        } else {
+            notesViewHolder.notify_date.setVisibility(View.GONE);
+        }
+
         int id = note.getId();
 
         if (selectedIds.contains(id)) {
@@ -86,7 +94,8 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         final CardView rootView;
         final TextView title;
         final TextView content;
-        final ImageView color;
+        final TextView notify_date;
+        final FrameLayout color;
 
         NotesViewHolder(View view) {
             super(view);
@@ -94,6 +103,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             title = view.findViewById(R.id.item_note_title);
             content = view.findViewById(R.id.item_note_content);
             rootView = view.findViewById(R.id.root_view);
+            notify_date = view.findViewById(R.id.item_note_notify_date);
             color = view.findViewById(R.id.item_note_color);
         }
     }

@@ -29,9 +29,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
+import javax.crypto.NoSuchPaddingException;
+
 import io.github.danielpinto8zz6.noteit.R;
+import io.github.danielpinto8zz6.noteit.encryption.AESHelper;
 import io.github.danielpinto8zz6.noteit.ui.MainActivity;
 
 import static io.github.danielpinto8zz6.noteit.ui.MainActivity.REQUEST_CODE_CREATION;
@@ -40,6 +45,8 @@ import static io.github.danielpinto8zz6.noteit.ui.MainActivity.REQUEST_CODE_SIGN
 
 public class Sync {
     private static final String TAG = "Google Drive Activity";
+
+    private static final String PASSWORD = "h5Y*nPaKDKyd%Tgy+3tz7q93ua!j8kAP@cx$S6NQauTvEts&Abpzyfu%W$6=!Ajek8_87SM_xA?LhP?_+@w?r^6Mxn@_84qBcgTNQFR#R#L7jECcPHu*?ahrKUrkjuJc";
 
     private DriveClient mDriveClient;
     private DriveResourceClient mDriveResourceClient;
@@ -97,9 +104,22 @@ public class Sync {
     private Task<Void> createFileIntentSender(DriveContents driveContents) {
 
         final String inFileName = activity.getDatabasePath(DATABASE_NAME).toString();
+        final String encryptedFileName = inFileName.concat(".crypt");
 
         try {
-            File dbFile = new File(inFileName);
+            AESHelper.encryptfile(inFileName, PASSWORD);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            File dbFile = new File(encryptedFileName);
             FileInputStream fis = new FileInputStream(dbFile);
             OutputStream outputStream = driveContents.getOutputStream();
 
@@ -114,7 +134,7 @@ public class Sync {
         }
 
         MetadataChangeSet metadataChangeSet = new MetadataChangeSet.Builder()
-                .setTitle("database_backup.db")
+                .setTitle("encrypted_backup.noteit")
                 .setMimeType("application/db")
                 .build();
 
@@ -148,6 +168,7 @@ public class Sync {
 
         //DB Path
         final String inFileName = activity.getDatabasePath(DATABASE_NAME).toString();
+        final String inFileNameEncrypted = inFileName.concat(".crypt");
 
         Task<DriveContents> openFileTask = mDriveResourceClient.openFile(file, DriveFile.MODE_READ_ONLY);
 
@@ -159,7 +180,7 @@ public class Sync {
                         FileInputStream fileInputStream = new FileInputStream(parcelFileDescriptor.getFileDescriptor());
 
                         // Open the empty db as the output stream
-                        OutputStream output = new FileOutputStream(inFileName);
+                        OutputStream output = new FileOutputStream(inFileNameEncrypted);
 
                         // Transfer bytes from the inputfile to the outputfile
                         byte[] buffer = new byte[1024];
@@ -172,7 +193,11 @@ public class Sync {
                         output.flush();
                         output.close();
                         fileInputStream.close();
+
+                        AESHelper.decrypt(inFileNameEncrypted, PASSWORD, inFileName);
+
                         Toast.makeText(activity, activity.getString(R.string.import_completed), Toast.LENGTH_SHORT).show();
+
                         activity.refresh();
 
                     } catch (Exception e) {
@@ -208,6 +233,4 @@ public class Sync {
                         .build();
         return pickItem(openOptions);
     }
-
-
 }

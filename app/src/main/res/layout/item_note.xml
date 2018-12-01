@@ -14,7 +14,7 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:padding="8dp">
@@ -33,9 +33,18 @@
                 android:layout_height="wrap_content"
                 android:padding="1dp"
                 android:text="@string/description" />
+
+            <TextView
+                android:id="@+id/item_note_notify_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="1dp"
+                android:text="@string/notify_date"
+                android:layout_gravity="end"
+                android:textSize="10sp"/>
         </LinearLayout>
 
-        <ImageView
+        <FrameLayout
             android:id="@+id/item_note_color"
             android:layout_width="match_parent"
             android:layout_height="3dp"

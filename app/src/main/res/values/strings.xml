@@ -20,4 +20,5 @@
     <string name="backup_successfully">Backup successufly loaded!</string>
     <string name="import_completed">Import completed</string>
     <string name="error_importing">Error importing</string>
+    <string name="notify_date">Notify date</string>
 </resources>
