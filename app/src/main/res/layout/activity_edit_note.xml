@@ -29,22 +29,35 @@
                 tools:targetApi="o" />
         </FrameLayout>
 
-        <FrameLayout
+
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="6dp">
+            android:fillViewport="true">
 
-            <EditText
-                android:id="@+id/note_content_input"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@null"
-                android:gravity="top|start"
-                android:hint="@string/description"
-                android:inputType="textMultiLine"
-                android:lines="6" />
+                android:layout_margin="6dp"
+                android:orientation="vertical">
 
-        </FrameLayout>
+                <ImageView
+                    android:id="@+id/note_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <EditText
+                    android:id="@+id/note_content_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:gravity="top|start"
+                    android:hint="@string/description"
+                    android:inputType="textMultiLine"
+                    android:lines="6" />
+            </LinearLayout>
+        </ScrollView>
+
     </LinearLayout>
 
     <android.support.design.widget.BottomNavigationView
@@ -66,8 +79,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="?android:selectableItemBackground"
-                android:src="@drawable/ic_add_box"
-                android:contentDescription="TODO" />
+                android:contentDescription="TODO"
+                android:onClick="attachImage"
+                android:src="@drawable/ic_add_box" />
         </FrameLayout>
 
         <FrameLayout

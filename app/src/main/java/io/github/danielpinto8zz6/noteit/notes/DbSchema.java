@@ -39,7 +39,7 @@ class DbSchema {
                 COL_EDITED_DATE + " DATETIME," +
                 COL_COLOR + " TEXT," +
                 COL_STATUS + " INTEGER DEFAULT 0," +
-                COL_IMAGE + " TEXT," +
+                COL_IMAGE + " BLOB," +
                 COL_TYPE + " INTEGER DEFAULT 0);";
 
         // Drop table statement

@@ -1,15 +1,9 @@
 package io.github.danielpinto8zz6.noteit;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.Environment;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -17,12 +11,6 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Utils {
-    public static byte[] getBitmapAsByteArray(Bitmap bitmap) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
-        return outputStream.toByteArray();
-    }
-
     public static String getDateTime(Date date) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(
                 "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
@@ -57,30 +45,26 @@ public class Utils {
         return String.format("#%02x%02x%02x", Color.red(color), Color.green(color), Color.blue(color));
     }
 
-    public static boolean exportDB(Context context) {
-        String DATABASE_NAME = "NoteIt.db";
-        String databasePath = context.getDatabasePath(DATABASE_NAME).getPath();
-        String inFileName = databasePath;
+    public static byte[] getBitmapAsByteArray(Bitmap bitmap) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 50, outputStream);
+        return outputStream.toByteArray();
+    }
+
+    public byte[] getThumbnail(Bitmap bitmap) {
+
         try {
-            File dbFile = new File(inFileName);
-            FileInputStream fis = new FileInputStream(dbFile);
 
-            String outFileName = Environment.getExternalStorageDirectory() + "/" + DATABASE_NAME;
+            final int THUMBNAIL_SIZE = 64;
 
-            OutputStream output = new FileOutputStream(outFileName);
+            bitmap = Bitmap.createScaledBitmap(bitmap, THUMBNAIL_SIZE, THUMBNAIL_SIZE, false);
 
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = fis.read(buffer)) > 0) {
-                output.write(buffer, 0, length);
-            }
-            //Close the streams
-            output.flush();
-            output.close();
-            fis.close();
-            return true;
-        } catch (Exception e) {
-            return false;
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            return baos.toByteArray();
+
+        } catch (Exception ex) {
+            return null;
         }
     }
 }

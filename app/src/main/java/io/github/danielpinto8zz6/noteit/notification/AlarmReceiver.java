@@ -13,6 +13,7 @@ import android.os.Build;
 import io.github.danielpinto8zz6.noteit.R;
 import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NoteDao;
+import io.github.danielpinto8zz6.noteit.ui.EditNoteActivity;
 import io.github.danielpinto8zz6.noteit.ui.MainActivity;
 
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
@@ -23,8 +24,6 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent notificationIntent = new Intent(context, MainActivity.class);
-
         int id = intent.getIntExtra("id", -1);
 
         if (id == -1)
@@ -36,6 +35,9 @@ public class AlarmReceiver extends BroadcastReceiver {
             // Don't notify since it's not active or doesn't exists (deleted)
             return;
         }
+
+        Intent notificationIntent = new Intent(context, EditNoteActivity.class);
+        notificationIntent.putExtra("note", note);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addParentStack(MainActivity.class);

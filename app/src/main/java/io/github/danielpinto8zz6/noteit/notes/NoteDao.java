@@ -170,7 +170,7 @@ public class NoteDao extends DbManager {
         note.setEdited_date(cursor.getString(cursor.getColumnIndex(DbSchema.Table_Note.COL_EDITED_DATE)));
         note.setColor(cursor.getString(cursor.getColumnIndex(DbSchema.Table_Note.COL_COLOR)));
         note.setStatus(cursor.getInt(cursor.getColumnIndex(DbSchema.Table_Note.COL_STATUS)));
-        note.setImage(cursor.getString(cursor.getColumnIndex(DbSchema.Table_Note.COL_IMAGE)));
+        note.setImage(cursor.getBlob(cursor.getColumnIndex(DbSchema.Table_Note.COL_IMAGE)));
         note.setType(cursor.getInt(cursor.getColumnIndex(DbSchema.Table_Note.COL_TYPE)));
 
         return note;

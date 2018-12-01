@@ -36,7 +36,6 @@ public class DbManager {
     DbManager() {}
 
     public DbManager open() {
-        Log.d("Note it", "DAMN");
         mDbHelper = new DbHelper(this);
         mDb = mDbHelper.getWritableDatabase();
         return this;

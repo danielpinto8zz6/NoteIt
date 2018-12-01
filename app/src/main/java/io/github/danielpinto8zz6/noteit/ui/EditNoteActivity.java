@@ -2,21 +2,28 @@ package io.github.danielpinto8zz6.noteit.ui;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.kizitonwose.colorpreference.ColorDialog;
 import com.kizitonwose.colorpreference.ColorShape;
 import com.kunzisoft.switchdatetime.SwitchDateTimeDialogFragment;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -35,12 +42,16 @@ import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ARCHIVED;
 public class EditNoteActivity extends AppCompatActivity implements ColorDialog.OnColorSelectedListener {
     private static final String TAG = "NoteIt";
     private static final String TAG_DATETIME_FRAGMENT = "TAG_DATETIME_FRAGMENT";
+    private static final int LOAD_IMAGE_RESULTS = 1234;
+    private static final int THUMBSIZE = 64;
 
     private Note note;
     private boolean editing = false;
     private boolean force = false;
     private TextView titleTv;
+    private ImageView imageView;
     private TextView contentTv;
+    private TextView dateTv;
     private boolean notify = false;
 
     private SwitchDateTimeDialogFragment dateTimeFragment;
@@ -54,8 +65,9 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         titleTv = findViewById(R.id.note_title_input);
+        imageView = findViewById(R.id.note_image);
         contentTv = findViewById(R.id.note_content_input);
-        TextView dateTv = findViewById(R.id.note_date);
+        dateTv = findViewById(R.id.note_date);
 
         dateTv.setText(Utils.getCurrentDateTime());
 
@@ -77,6 +89,14 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
             if (color != null) {
                 setToolbarColor(Color.parseColor(color));
             }
+
+            byte[] image = note.getImage();
+            if (image != null) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+                imageView.setImageBitmap(bitmap);
+            }
+
+
         } else {
             note = new Note();
         }
@@ -250,5 +270,33 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         getWindow().setStatusBarColor(c);
 
+    }
+
+    public void attachImage(View view) {
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        photoPickerIntent.setType("image/*");
+        startActivityForResult(photoPickerIntent, LOAD_IMAGE_RESULTS);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Here we need to check if the activity that was triggers was the Image Gallery.
+        // If it is the requestCode will match the LOAD_IMAGE_RESULTS value.
+        // If the resultCode is RESULT_OK and there is some data we know that an image was picked.
+        if (requestCode == LOAD_IMAGE_RESULTS && resultCode == RESULT_OK && data != null) {
+            Uri uri = data.getData();
+
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                byte[] image = Utils.getBitmapAsByteArray(bitmap);
+                BitmapFactory.decodeByteArray(image, 0, image.length);
+                note.setImage(image);
+                imageView.setImageBitmap(BitmapFactory.decodeByteArray(image, 0, image.length));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

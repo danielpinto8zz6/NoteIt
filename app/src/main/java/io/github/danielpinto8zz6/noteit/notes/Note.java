@@ -27,14 +27,14 @@ public class Note implements Parcelable {
     private String edited_date;
     private String color;
     private Integer status = 0;
-    private String image;
+    private byte[] image;
 
     private Integer type = 0;
 
     public Note() {
     }
 
-    public Note(Integer id, String title, String content, String create_date, String notify_date, String edited_date, String color, Integer status, String image, Integer type) {
+    public Note(Integer id, String title, String content, String create_date, String notify_date, String edited_date, String color, Integer status, byte[] image, Integer type) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -103,11 +103,11 @@ public class Note implements Parcelable {
         this.status = status;
     }
 
-    public String getImage() {
+    public byte[] getImage() {
         return image;
     }
 
-    public void setImage(String image) {
+    public void setImage(byte[] image) {
         this.image = image;
     }
 
@@ -137,7 +137,7 @@ public class Note implements Parcelable {
         b.putString(COL_EDITED_DATE, this.notify_date);
         b.putString(COL_COLOR, this.color);
         b.putInt(COL_STATUS, this.status);
-        b.putString(COL_IMAGE, this.image);
+        b.putByteArray(COL_IMAGE, this.image);
         b.putInt(COL_TYPE, this.type);
         return b;
     }
@@ -152,7 +152,7 @@ public class Note implements Parcelable {
             this.edited_date = b.getString(COL_EDITED_DATE);
             this.color = b.getString(COL_COLOR);
             this.status = b.getInt(COL_STATUS);
-            this.image = b.getString(COL_IMAGE);
+            this.image = b.getByteArray(COL_IMAGE);
             this.type = b.getInt(COL_TYPE);
         }
     }
@@ -174,19 +174,6 @@ public class Note implements Parcelable {
                 '}';
     }
 
-    protected Note(Parcel in) {
-        id = in.readByte() == 0x00 ? null : in.readInt();
-        title = in.readString();
-        content = in.readString();
-        create_date = in.readString();
-        notify_date = in.readString();
-        edited_date = in.readString();
-        color = in.readString();
-        status = in.readByte() == 0x00 ? null : in.readInt();
-        image = in.readString();
-        type = in.readByte() == 0x00 ? null : in.readInt();
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -194,38 +181,35 @@ public class Note implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        if (id == null) {
-            dest.writeByte((byte) (0x00));
-        } else {
-            dest.writeByte((byte) (0x01));
-            dest.writeInt(id);
-        }
-        dest.writeString(title);
-        dest.writeString(content);
-        dest.writeString(create_date);
-        dest.writeString(notify_date);
-        dest.writeString(edited_date);
-        dest.writeString(color);
-        if (status == null) {
-            dest.writeByte((byte) (0x00));
-        } else {
-            dest.writeByte((byte) (0x01));
-            dest.writeInt(status);
-        }
-        dest.writeString(image);
-        if (type == null) {
-            dest.writeByte((byte) (0x00));
-        } else {
-            dest.writeByte((byte) (0x01));
-            dest.writeInt(type);
-        }
+        dest.writeValue(this.id);
+        dest.writeString(this.title);
+        dest.writeString(this.content);
+        dest.writeString(this.create_date);
+        dest.writeString(this.notify_date);
+        dest.writeString(this.edited_date);
+        dest.writeString(this.color);
+        dest.writeValue(this.status);
+        dest.writeByteArray(this.image);
+        dest.writeValue(this.type);
     }
 
-    @SuppressWarnings("unused")
+    protected Note(Parcel in) {
+        this.id = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.title = in.readString();
+        this.content = in.readString();
+        this.create_date = in.readString();
+        this.notify_date = in.readString();
+        this.edited_date = in.readString();
+        this.color = in.readString();
+        this.status = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.image = in.createByteArray();
+        this.type = (Integer) in.readValue(Integer.class.getClassLoader());
+    }
+
     public static final Parcelable.Creator<Note> CREATOR = new Parcelable.Creator<Note>() {
         @Override
-        public Note createFromParcel(Parcel in) {
-            return new Note(in);
+        public Note createFromParcel(Parcel source) {
+            return new Note(source);
         }
 
         @Override

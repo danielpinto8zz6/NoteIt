@@ -154,7 +154,6 @@ public class Sync {
                         });
     }
 
-
     private void startDriveRestore() {
         pickFile()
                 .addOnSuccessListener(activity,
