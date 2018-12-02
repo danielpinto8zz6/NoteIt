@@ -1,3 +1,14 @@
+/*
+Class NoteDao is a class use to place in the database each note.
+DAO means: Data Access Object
+
+Author: Daniel Pinto
+
+Creation date: ‎25‎/11/‎2018
+
+Last modification: 02/12/2018
+ */
+
 package io.github.danielpinto8zz6.noteit.notes;
 
 import android.content.ContentValues;
@@ -17,37 +28,42 @@ public class NoteDao extends DbManager {
     private static final String[] allColumns = DbSchema.Table_Note.allColumns;
 
     protected NoteDao() {
+        //Empty constructor
     }
 
-    private static void database_open() throws SQLException {
+    private static void databaseOpen() throws SQLException {
+        //Open database
         mDbManager = DbManager.getsInstance();
         database = mDbManager.getDatabase();
     }
 
-    private static void database_close() {
+    private static void databaseClose() throws SQLException{
+        //Close database
+        //Get the instance is needed to knwo what database close, because mDbManager is not initialized out the method
         mDbManager = DbManager.getsInstance();
         mDbManager.close();
     }
 
-    public static Note loadRecordById(int mid) {
-        database_open();
-        Cursor cursor = database.query(DbSchema.Table_Note.TABLE_NAME, allColumns, "id = ?", new String[]{String.valueOf(mid)}, null, null, null, null);
+    public static Note loadRecordById(int mId) {
+        //load a Note from the table by its id
+        databaseOpen();
+        Cursor cursor = database.query(DbSchema.Table_Note.TABLE_NAME, allColumns, "id = ?", new String[]{String.valueOf(mId)}, null, null, null, null);
 
         if (cursor != null)
             cursor.moveToFirst();
 
-        Note note = new Note();
-        note = cursorToNote(Objects.requireNonNull(cursor));
+        Note note = cursorToNote(Objects.requireNonNull(cursor));
 
         cursor.close();
-        database_close();
+        databaseClose();
 
         return note;
     }
 
     public static ArrayList<Note> loadAllRecords() {
+        //Load all the records and put them in an Array list of notes
         ArrayList<Note> noteList = new ArrayList<>();
-        database_open();
+        databaseOpen();
 
         Cursor cursor = database.query(
                 DbSchema.Table_Note.TABLE_NAME,
@@ -65,15 +81,16 @@ public class NoteDao extends DbManager {
             cursor.moveToNext();
         }
         cursor.close();
-        database_close();
+        databaseClose();
         return noteList;
     }
 
     // Please always use the typed column names (Table_Note) when passing arguments.
     // Example: Table_Note.Column_Name
     public static ArrayList<Note> loadAllRecords(String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
+        //Load all the records by some parameters, needed for specific queries
         ArrayList<Note> noteList = new ArrayList<Note>();
-        database_open();
+        databaseOpen();
 
         if (TextUtils.isEmpty(selection)) {
             selection = null;
@@ -91,58 +108,61 @@ public class NoteDao extends DbManager {
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            Note note = cursorToNote(cursor);
-            noteList.add(note);
+            noteList.add(cursorToNote(cursor));
             cursor.moveToNext();
         }
         cursor.close();
-        database_close();
+        databaseClose();
         return noteList;
     }
 
     public static long insertRecord(Note note) {
-        ContentValues values = new ContentValues();
-        values = getNoteValues(note);
-        database_open();
+        //Insert a note in the database
+        ContentValues values = getNoteValues(note);
+        databaseOpen();
         long insertId = database.insert(DbSchema.Table_Note.TABLE_NAME, null, values);
-        database_close();
+        databaseClose();
         return insertId;
     }
 
     public static int updateRecord(Note note) {
-        ContentValues values = new ContentValues();
-        values = getNoteValues(note);
-        database_open();
+        //Update the note info in the database
+        ContentValues values = getNoteValues(note);
+        databaseOpen();
         String[] where = new String[]{String.valueOf(note.getId())};
         int updatedId = database.update(DbSchema.Table_Note.TABLE_NAME, values, DbSchema.Table_Note.COL_ID + " = ? ", where);
-        database_close();
+        databaseClose();
         return updatedId;
     }
 
     public static int deleteRecord(Note note) {
-        database_open();
+        //Delete that note from the database
+        databaseOpen();
         String[] where = new String[]{String.valueOf(note.getId())};
         int deletedCount = database.delete(DbSchema.Table_Note.TABLE_NAME, DbSchema.Table_Note.COL_ID + " = ? ", where);
-        database_close();
+        databaseClose();
         return deletedCount;
     }
 
     public static int deleteRecord(String id) {
-        database_open();
+        //Delete a note from the database selected by its id
+        databaseOpen();
         String[] where = new String[]{id};
         int deletedCount = database.delete(DbSchema.Table_Note.TABLE_NAME, DbSchema.Table_Note.COL_ID + " = ? ", where);
-        database_close();
+        databaseClose();
         return deletedCount;
     }
 
     public static int deleteAllRecords() {
-        database_open();
+        //Delete all the records from the database
+        databaseOpen();
         int deletedCount = database.delete(DbSchema.Table_Note.TABLE_NAME, null, null);
-        database_close();
+        databaseClose();
         return deletedCount;
     }
 
     private static ContentValues getNoteValues(Note note) {
+        //Get the values from the database of that note
         ContentValues values = new ContentValues();
 
         values.put(DbSchema.Table_Note.COL_ID, note.getId());
@@ -160,6 +180,7 @@ public class NoteDao extends DbManager {
     }
 
     private static Note cursorToNote(Cursor cursor) {
+        //Get the note having its cursor
         Note note = new Note();
 
         note.setId(cursor.getInt(cursor.getColumnIndex(DbSchema.Table_Note.COL_ID)));
