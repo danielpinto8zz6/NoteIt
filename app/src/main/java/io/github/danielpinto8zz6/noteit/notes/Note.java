@@ -1,3 +1,13 @@
+/*
+Class Note is a class use to define each note (content, title, color, creation date...)
+
+Author: Daniel Pinto
+
+Creation date: ‎25‎/11/‎2018
+
+Last modification: 02/12/2018
+ */
+
 package io.github.danielpinto8zz6.noteit.notes;
 
 import android.os.Bundle;
@@ -32,9 +42,11 @@ public class Note implements Parcelable {
     private Integer type = 0;
 
     public Note() {
+        //Empty constructor
     }
 
     public Note(Integer id, String title, String content, String create_date, String notify_date, String edited_date, String color, Integer status, byte[] image, Integer type) {
+        //Constructor filling all the attributes of a note
         this.id = id;
         this.title = title;
         this.content = content;
@@ -47,6 +59,25 @@ public class Note implements Parcelable {
         this.type = type;
     }
 
+    public Note(Bundle b) {
+        //A constructor filling the attributes of a note with a Bundle
+        if (b != null) {
+            this.id = b.getInt(COL_ID);
+            this.title = b.getString(COL_TITLE);
+            this.content = b.getString(COL_CONTENT);
+            this.create_date = b.getString(COL_CREATE_DATE);
+            this.notify_date = b.getString(COL_NOTIFY_DATE);
+            this.edited_date = b.getString(COL_EDITED_DATE);
+            this.color = b.getString(COL_COLOR);
+            this.status = b.getInt(COL_STATUS);
+            this.image = b.getByteArray(COL_IMAGE);
+            this.type = b.getInt(COL_TYPE);
+        }
+    }
+
+    /*
+    This part are getters and setters from the Note attributes
+     */
     public Integer getId() {
         return id;
     }
@@ -146,24 +177,10 @@ public class Note implements Parcelable {
         return b;
     }
 
-    public Note(Bundle b) {
-        if (b != null) {
-            this.id = b.getInt(COL_ID);
-            this.title = b.getString(COL_TITLE);
-            this.content = b.getString(COL_CONTENT);
-            this.create_date = b.getString(COL_CREATE_DATE);
-            this.notify_date = b.getString(COL_NOTIFY_DATE);
-            this.edited_date = b.getString(COL_EDITED_DATE);
-            this.color = b.getString(COL_COLOR);
-            this.status = b.getInt(COL_STATUS);
-            this.image = b.getByteArray(COL_IMAGE);
-            this.type = b.getInt(COL_TYPE);
-        }
-    }
-
     @NonNull
     @Override
     public String toString() {
+        //To string method to print the data
         return "Note{" +
                 " mid=" + id +
                 ", mtitle='" + title + '\'' +
@@ -178,6 +195,10 @@ public class Note implements Parcelable {
                 '}';
     }
 
+    /*
+    This part was not part of the inspection and its still in development
+    Not finish
+     */
     @Override
     public int describeContents() {
         return 0;
