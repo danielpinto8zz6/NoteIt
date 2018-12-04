@@ -11,7 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +69,30 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             notesViewHolder.notify_date.setVisibility(View.GONE);
         }
 
+//        if (note.gettype() == 1) {
+//            notesviewholder.content.setvisibility(view.invisible);
+//            notesviewholder.listview.setvisibility(view.visible);
+//
+//            arraylist<tasklistitem> tasklist = new arraylist<>();
+//            tasklistadapter listadapter = new tasklistadapter(activity, tasklist);
+//            notesviewholder.listview.setadapter(listadapter);
+//
+//            try {
+//                jsonarray content = new jsonarray(note.getcontent());
+//                for (int j = 0; j < content.length(); j++) {
+//                    jsonobject o = content.getjsonobject(j);
+//                    tasklist.add(new tasklistitem(o.getboolean("checked"), o.getstring("name")));
+//                }
+//                listadapter.notifydatasetchanged();
+//            } catch (exception e) {
+//                e.printstacktrace();
+//            }
+//
+//        } else {
+//            notesviewholder.content.setvisibility(view.visible);
+//            notesviewholder.listview.setvisibility(view.invisible);
+//        }
+
         int id = note.getId();
 
         if (selectedIds.contains(id)) {
@@ -95,6 +123,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         final TextView title;
         final TextView content;
         final TextView notify_date;
+        final ListView listView;
         final FrameLayout color;
 
         NotesViewHolder(View view) {
@@ -105,6 +134,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             rootView = view.findViewById(R.id.root_view);
             notify_date = view.findViewById(R.id.item_note_notify_date);
             color = view.findViewById(R.id.item_note_color);
+            listView = view.findViewById(R.id.task_list);
         }
     }
 }

@@ -127,6 +127,10 @@ public class Note implements Parcelable {
         this.type = type;
     }
 
+    public boolean isEmpty() {
+        return (title == null && content == null && color == null && notify_date == null) ? true : false;
+    }
+
     public Bundle toBundle() {
         Bundle b = new Bundle();
         b.putInt(COL_ID, this.id);

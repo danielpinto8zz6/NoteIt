@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.github.danielpinto8zz6.noteit">
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
     <application
         android:name=".App"
@@ -24,12 +24,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.EditNoteActivity"
-            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.EditNoteActivity" />
+        <activity android:name=".ui.EditTaskActivity" />
 
-        <receiver android:name=".notification.AlarmReceiver" />
+        <service android:name=".notification.NotificationService" />
 
+        <receiver android:name=".notification.BootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

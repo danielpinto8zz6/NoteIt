@@ -22,4 +22,9 @@
     <string name="error_importing">Error importing</string>
     <string name="notify_date">Notify date</string>
     <string name="attach">Attach</string>
+    <string name="add">Add</string>
+    <string name="create_note">Create Note</string>
+    <string name="create_task">Create Task</string>
+    <string name="edit">Edit</string>
+    <string name="list_item">List item</string>
 </resources>

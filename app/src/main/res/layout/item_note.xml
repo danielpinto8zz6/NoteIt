@@ -10,12 +10,12 @@
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
 
@@ -26,6 +26,14 @@
                 android:padding="1dp"
                 android:text="@string/title"
                 android:textSize="18sp" />
+
+            <!--<ListView-->
+                <!--android:id="@+id/task_list"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:divider="@null"-->
+                <!--android:dividerHeight="0dp"-->
+                <!--android:scrollbars="none" />-->
 
             <TextView
                 android:id="@+id/item_note_content"
@@ -38,10 +46,10 @@
                 android:id="@+id/item_note_notify_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="end"
                 android:padding="1dp"
                 android:text="@string/notify_date"
-                android:layout_gravity="end"
-                android:textSize="10sp"/>
+                android:textSize="10sp" />
         </LinearLayout>
 
         <FrameLayout

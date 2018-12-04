@@ -18,7 +18,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -26,7 +28,11 @@ import com.kizitonwose.colorpreference.ColorDialog;
 import com.kizitonwose.colorpreference.ColorShape;
 import com.kunzisoft.switchdatetime.SwitchDateTimeDialogFragment;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -43,7 +49,7 @@ import io.github.danielpinto8zz6.noteit.notification.NotificationService;
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ACTIVE;
 import static io.github.danielpinto8zz6.noteit.Constants.STATUS_ARCHIVED;
 
-public class EditNoteActivity extends AppCompatActivity implements ColorDialog.OnColorSelectedListener, PopupMenu.OnMenuItemClickListener {
+public class EditTaskActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener, ColorDialog.OnColorSelectedListener {
     private static final String TAG = "NoteIt";
     private static final String TAG_DATETIME_FRAGMENT = "TAG_DATETIME_FRAGMENT";
     private static final int LOAD_IMAGE_RESULTS = 1234;
@@ -53,29 +59,37 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
     private boolean force = false;
     private boolean hasAlarm = false;
 
-    private TextView titleEt;
-    private ImageView imageView;
-    private TextView contentEt;
     private TextView dateTv;
+    private EditText titleEt;
+    private EditText newItemEt;
+    private ListView lvItemList;
+    private ImageView imageView;
+
+    ArrayList<TaskListItem> taskList;
 
     private SwitchDateTimeDialogFragment dateTimeFragment;
 
     private Menu mOptionsMenu;
 
+    private TaskListAdapter listAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_note);
+        setContentView(R.layout.activity_edit_task);
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        titleEt = findViewById(R.id.note_title);
-        imageView = findViewById(R.id.note_image);
-        contentEt = findViewById(R.id.note_content);
-        dateTv = findViewById(R.id.note_date);
+        findViewById(R.id.btn_add).setOnClickListener(this);
 
-        dateTv.setText(Utils.getCurrentDateTime());
+        titleEt = (EditText) findViewById(R.id.task_title);
+        newItemEt = (EditText) findViewById(R.id.task_item);
+        lvItemList = (ListView) findViewById(R.id.task_list);
+        dateTv = findViewById(R.id.note_date);
+        imageView = findViewById(R.id.note_image);
+
+        taskList = new ArrayList<>();
 
         dateTv.setText(Utils.getCurrentDateTime());
 
@@ -88,14 +102,29 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
 
         if (note != null) {
             edit = true;
+
         } else {
             note = new Note();
         }
 
+        note.setType(1);
+
+        listAdapter = new TaskListAdapter(this, taskList);
+        lvItemList.setAdapter(listAdapter);
+
         if (edit) {
             hasAlarm = (note.getNotify_date() != null);
             titleEt.setText(note.getTitle());
-            contentEt.setText(note.getContent());
+            try {
+                JSONArray content = new JSONArray(note.getContent());
+                for (int i = 0; i < content.length(); i++) {
+                    JSONObject o = content.getJSONObject(i);
+                    taskList.add(new TaskListItem(o.getBoolean("checked"), o.getString("name")));
+                }
+                listAdapter.notifyDataSetChanged();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             String editedDate = note.getEdited_date();
             if (editedDate != null)
@@ -148,10 +177,10 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
                     edit = true;
                 }
 
-                Intent i = new Intent(EditNoteActivity.this, NotificationService.class);
+                Intent i = new Intent(EditTaskActivity.this, NotificationService.class);
                 i.putExtra("note_id", note.getId());
 
-                PendingIntent pi = PendingIntent.getService(EditNoteActivity.this, note.getId(), i, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent pi = PendingIntent.getService(EditTaskActivity.this, note.getId(), i, PendingIntent.FLAG_UPDATE_CURRENT);
 
                 AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
@@ -176,6 +205,12 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
     }
 
     @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.icons_edit_note, menu);
         mOptionsMenu = menu;
@@ -191,7 +226,116 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
     }
 
     @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_add:
+                if (!newItemEt.getText().toString().isEmpty()) {
+                    taskList.add(new TaskListItem(false, newItemEt.getText().toString()));
+                    newItemEt.setText("");
+                    listAdapter.notifyDataSetChanged();
+                }
+                break;
+            default:
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        if (!force) {
+            if (edit) {
+                updateNote();
+            } else {
+                saveNote();
+                edit = true;
+            }
+        }
+
+        super.onPause();
+    }
+
+    private void updateNote() {
+        JSONArray jsonArray = new JSONArray();
+
+        try {
+            for (TaskListItem item : taskList) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("name", item.getCaption());
+                jsonObject.put("checked", item.isChecked());
+                jsonArray.put(jsonObject);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String orig = note.toString();
+
+        note.setTitle(titleEt.getText().toString());
+        note.setContent(jsonArray.toString());
+
+        if (!orig.equals(note.toString())) {
+            note.setEdited_date(Utils.getCurrentDateTime());
+        }
+
+        NoteDao.updateRecord(note);
+    }
+
+    private void saveNote() {
+        JSONArray jsonArray = new JSONArray();
+        try {
+            for (TaskListItem item : taskList) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("name", item.getCaption());
+                jsonObject.put("checked", item.isChecked());
+                jsonArray.put(jsonObject);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String title = titleEt.getText().toString();
+        String content = jsonArray.toString();
+
+        if (title.isEmpty() && content.isEmpty())
+            return;
+
+
+        note.setTitle(titleEt.getText().toString());
+        note.setContent(content);
+        note.setId((int) NoteDao.insertRecord(note));
+    }
+
+    private void cancelNotification() {
+        //Create the intent that would be fired by AlarmManager
+        Intent i = new Intent(this, NotificationService.class);
+        i.putExtra("note_id", note.getId());
+
+        PendingIntent pi = PendingIntent.getService(this, note.getId(), i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(pi);
+
+        note.setNotify_date(null);
+
+        hasAlarm = false;
+
+        MenuItem item = mOptionsMenu.findItem(R.id.action_add_alert);
+        item.setIcon(R.drawable.ic_add_alert);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.action_add_alert);
+        if (hasAlarm) {
+            item.setIcon(R.drawable.ic_remove_alert);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         if (id == R.id.action_archive) {
@@ -251,58 +395,6 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
     }
 
     @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
-
-    @Override
-    protected void onPause() {
-        if (!force) {
-            if (edit) {
-                updateNote();
-            } else {
-                saveNote();
-                edit = true;
-            }
-        }
-
-        super.onPause();
-    }
-
-    private void saveNote() {
-        String title = titleEt.getText().toString();
-        String content = contentEt.getText().toString();
-
-        if (note.isEmpty())
-            return;
-
-        note.setTitle(title);
-        note.setContent(content);
-        note.setId((int) NoteDao.insertRecord(note));
-    }
-
-    private void updateNote() {
-        String title = titleEt.getText().toString();
-        String content = contentEt.getText().toString();
-
-        String orig = note.toString();
-        note.setTitle(title);
-        note.setContent(content);
-
-        if (!orig.equals(note.toString())) {
-            note.setEdited_date(Utils.getCurrentDateTime());
-        }
-
-        NoteDao.updateRecord(note);
-    }
-
-    @Override
     public void onColorSelected(int i, String s) {
         String color = Utils.getColorHex(i);
         note.setColor(color);
@@ -318,6 +410,15 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
         int colorDark = ColorUtil.darken(c, 12);
         getWindow().setStatusBarColor(colorDark);
 
+    }
+
+    public void changeColor(View view) {
+        new ColorDialog.Builder(this)
+                .setColorShape(ColorShape.CIRCLE) //CIRCLE or SQUARE
+                .setColorChoices(R.array.color_choices) //an array of colors
+                .setSelectedColor(Color.GREEN) //the checked color
+                .setTag(TAG) // tags can be useful when multiple components use the picker within an activity
+                .show();
     }
 
     public void attachImage(View view) {
@@ -347,41 +448,4 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
             }
         }
     }
-
-    public void changeColor(View view) {
-        new ColorDialog.Builder(this)
-                .setColorShape(ColorShape.CIRCLE) //CIRCLE or SQUARE
-                .setColorChoices(R.array.color_choices) //an array of colors
-                .setSelectedColor(Color.GREEN) //the checked color
-                .setTag("TAG") // tags can be useful when multiple components use the picker within an activity
-                .show();
-    }
-
-    private void cancelNotification() {
-        //Create the intent that would be fired by AlarmManager
-        Intent i = new Intent(this, NotificationService.class);
-        i.putExtra("note_id", note.getId());
-
-        PendingIntent pi = PendingIntent.getService(this, note.getId(), i, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(pi);
-
-        note.setNotify_date(null);
-
-        hasAlarm = false;
-
-        MenuItem item = mOptionsMenu.findItem(R.id.action_add_alert);
-        item.setIcon(R.drawable.ic_add_alert);
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem item = menu.findItem(R.id.action_add_alert);
-        if (hasAlarm) {
-            item.setIcon(R.drawable.ic_remove_alert);
-        }
-        return super.onPrepareOptionsMenu(menu);
-    }
-
 }
