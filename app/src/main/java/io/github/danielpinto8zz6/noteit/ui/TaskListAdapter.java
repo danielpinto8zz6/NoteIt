@@ -1,10 +1,11 @@
 package io.github.danielpinto8zz6.noteit.ui;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -13,78 +14,67 @@ import java.util.ArrayList;
 
 import io.github.danielpinto8zz6.noteit.R;
 
-public class TaskListAdapter extends BaseAdapter {
+public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskListViewHolder> {
     private ArrayList<TaskListItem> taskList;
-    private LayoutInflater mInflater;
+    private Context context;
 
     public TaskListAdapter(Context context, ArrayList<TaskListItem> taskList) {
+        this.context = context;
         this.taskList = taskList;
-        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        notifyDataSetChanged();
     }
 
-    public int getCount() {
-        return taskList.size();
+    @NonNull
+    @Override
+    public TaskListViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        View view = LayoutInflater.from(context)
+                .inflate(R.layout.item_checklist, viewGroup, false);
+
+        return new TaskListViewHolder(view);
     }
 
-    public TaskListItem getItem(int position) {
-        return taskList.get(position);
-    }
+    @Override
+    public void onBindViewHolder(@NonNull TaskListViewHolder viewHolder, int i) {
+        TaskListItem item = taskList.get(i);
 
-    public long getItemId(int position) {
-        return position;
-    }
+        viewHolder.caption.setText(item.getCaption());
+        viewHolder.checkBox.setChecked(item.isChecked());
 
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
-        if (convertView == null) {
-            holder = new ViewHolder();
-            convertView = mInflater.inflate(R.layout.item_checklist, null);
-
-            holder.caption = (EditText) convertView.findViewById(R.id.item_caption);
-            holder.checkBox = (CheckBox) convertView.findViewById(R.id.item_checkbox);
-            holder.closeButton = (ImageButton) convertView.findViewById(R.id.item_close);
-
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
-        //Fill EditText with the value you have in data source
-        holder.caption.setText(taskList.get(position).getCaption());
-        holder.checkBox.setChecked(taskList.get(position).isChecked());
-
-        //we need to update adapter once we finish with editing
-        holder.caption.setOnFocusChangeListener((v, hasFocus) -> {
-            if (!hasFocus) {
-                holder.closeButton.setVisibility(View.INVISIBLE);
-                final EditText Caption = (EditText) v;
-                TaskListItem item = taskList.get(position);
-                if (item != null)
-                    item.setCaption(Caption.getText().toString());
+        viewHolder.caption.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                viewHolder.closeButton.setVisibility(View.VISIBLE);
             } else {
-                holder.closeButton.setVisibility(View.VISIBLE);
+                viewHolder.closeButton.setVisibility(View.INVISIBLE);
+                item.setCaption(viewHolder.caption.getText().toString());
             }
         });
 
-        holder.checkBox.setOnClickListener(v -> {
-            final CheckBox checkBox = (CheckBox) v;
-            TaskListItem item = taskList.get(position);
-            if (item != null)
-                item.setChecked(checkBox.isChecked());
+        viewHolder.checkBox.setOnClickListener(v -> {
+            item.setChecked(viewHolder.checkBox.isChecked());
         });
 
-        holder.closeButton.setOnClickListener(v -> {
-            holder.caption.setOnFocusChangeListener(null);
-            taskList.remove(position);
+        viewHolder.closeButton.setOnClickListener(v -> {
+            viewHolder.caption.setOnFocusChangeListener(null);
+            taskList.remove(item);
             notifyDataSetChanged();
         });
-
-        return convertView;
     }
-}
 
-class ViewHolder {
-    EditText caption;
-    CheckBox checkBox;
-    ImageButton closeButton;
+    @Override
+    public int getItemCount() {
+        return taskList.size();
+    }
+
+    public class TaskListViewHolder extends RecyclerView.ViewHolder {
+        EditText caption;
+        CheckBox checkBox;
+        ImageButton closeButton;
+
+        public TaskListViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            caption = itemView.findViewById(R.id.item_caption);
+            checkBox = itemView.findViewById(R.id.item_checkbox);
+            closeButton = itemView.findViewById(R.id.item_close);
+        }
+    }
 }

@@ -23,23 +23,19 @@
                 android:id="@+id/item_note_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="1dp"
                 android:text="@string/title"
                 android:textSize="18sp" />
 
-            <!--<ListView-->
-                <!--android:id="@+id/task_list"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:divider="@null"-->
-                <!--android:dividerHeight="0dp"-->
-                <!--android:scrollbars="none" />-->
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/task_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none" />
 
             <TextView
                 android:id="@+id/item_note_content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="1dp"
                 android:text="@string/description" />
 
             <TextView
@@ -47,7 +43,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:padding="1dp"
                 android:text="@string/notify_date"
                 android:textSize="10sp" />
         </LinearLayout>

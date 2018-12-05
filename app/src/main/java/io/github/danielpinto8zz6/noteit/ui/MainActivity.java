@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -94,6 +95,8 @@ public class MainActivity extends AppCompatActivity
                 if (newState == DrawerLayout.STATE_SETTLING && !drawer.isDrawerOpen(GravityCompat.START)) {
                     if (actionMode != null)
                         actionMode.finish();
+                    if (mSpeedDialView.isOpen())
+                        mSpeedDialView.close();
                 }
             }
         };
@@ -131,18 +134,19 @@ public class MainActivity extends AppCompatActivity
 
     private void initSpeedDial(boolean addActionItems) {
         mSpeedDialView = findViewById(R.id.speedDial);
-
         if (addActionItems) {
             mSpeedDialView.addActionItem(new SpeedDialActionItem.Builder(R.id.fab_task, R.drawable
                     .ic_list)
-//                    .setFabBackgroundColor(Color.parseColor("#CDDC39"))
+                    .setFabBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, getTheme()))
+                    .setFabImageTintColor(Color.WHITE)
                     .setLabel(getString(R.string.create_task))
                     .setLabelBackgroundColor(Color.WHITE)
                     .create());
 
             mSpeedDialView.addActionItem(new SpeedDialActionItem.Builder(R.id.fab_note, R.drawable
                     .ic_add_note)
-//                    .setFabBackgroundColor(Color.parseColor("#03A9F4 "))
+                    .setFabBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, getTheme()))
+                    .setFabImageTintColor(Color.WHITE)
                     .setLabel(getString(R.string.create_note))
                     .setLabelBackgroundColor(Color.WHITE)
                     .create());
@@ -157,7 +161,6 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onToggleChanged(boolean isOpen) {
-                Log.d(TAG, "Speed dial toggle state changed. Open = " + isOpen);
             }
         });
 
@@ -310,8 +313,7 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (mSpeedDialView.isOpen()) {
             mSpeedDialView.close();
-        }
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        } else if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();

@@ -7,7 +7,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Build;
-import android.support.v4.app.NotificationCompat;
 
 import io.github.danielpinto8zz6.noteit.R;
 import io.github.danielpinto8zz6.noteit.notes.Note;
@@ -30,6 +29,8 @@ public class NotificationService extends IntentService {
         int id = intent.getIntExtra("note_id", -1);
         if (id != -1) {
             Note note = NoteDao.loadRecordById(id);
+            note.setNotify_date("");
+            NoteDao.updateRecord(note);
 
             if (note == null || note.getStatus() != STATUS_ACTIVE) {
                 // Don't notify since it's not active or doesn't exists (deleted)
@@ -74,8 +75,6 @@ public class NotificationService extends IntentService {
             }
 
             mNotifyMgr.notify(note.getId(), mBuilder.build());
-            note.setNotify_date(null);
-            NoteDao.updateRecord(note);
         }
     }
 }

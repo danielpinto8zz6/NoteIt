@@ -49,6 +49,8 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
     private static final int LOAD_IMAGE_RESULTS = 1234;
 
     private Note note;
+    private int hashCode;
+
     private boolean edit = false;
     private boolean force = false;
     private boolean hasAlarm = false;
@@ -93,18 +95,18 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
         }
 
         if (edit) {
-            hasAlarm = (note.getNotify_date() != null);
+            hasAlarm = (note.getNotify_date() != null && !note.getNotify_date().isEmpty());
             titleEt.setText(note.getTitle());
             contentEt.setText(note.getContent());
 
             String editedDate = note.getEdited_date();
-            if (editedDate != null)
+            if (editedDate != null && !editedDate.isEmpty())
                 dateTv.setText(editedDate);
             else
                 dateTv.setText(note.getCreate_date());
 
             String color = note.getColor();
-            if (color != null) {
+            if (color != null && !color.isEmpty()) {
                 setToolbarColor(Color.parseColor(color));
             }
 
@@ -113,6 +115,7 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
                 Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
                 imageView.setImageBitmap(bitmap);
             }
+            hashCode = note.hashCode();
         }
         if (!initial) {
             invalidateOptionsMenu();
@@ -145,7 +148,6 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
 
                 if (!edit) {
                     saveNote();
-                    edit = true;
                 }
 
                 Intent i = new Intent(EditNoteActivity.this, NotificationService.class);
@@ -268,7 +270,6 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
                 updateNote();
             } else {
                 saveNote();
-                edit = true;
             }
         }
 
@@ -276,30 +277,34 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
     }
 
     private void saveNote() {
-        String title = titleEt.getText().toString();
-        String content = contentEt.getText().toString();
+        note.setTitle(titleEt.getText().toString());
+        note.setContent(contentEt.getText().toString());
 
         if (note.isEmpty())
             return;
 
-        note.setTitle(title);
-        note.setContent(content);
         note.setId((int) NoteDao.insertRecord(note));
+
+        edit = true;
+        hashCode = note.hashCode();
     }
 
     private void updateNote() {
         String title = titleEt.getText().toString();
         String content = contentEt.getText().toString();
 
-        String orig = note.toString();
+        int hash = note.hashCode();
+
         note.setTitle(title);
         note.setContent(content);
 
-        if (!orig.equals(note.toString())) {
+        if (hash != note.hashCode()) {
             note.setEdited_date(Utils.getCurrentDateTime());
         }
 
         NoteDao.updateRecord(note);
+
+        hashCode = note.hashCode();
     }
 
     @Override
@@ -367,7 +372,7 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(pi);
 
-        note.setNotify_date(null);
+        note.setNotify_date("");
 
         hasAlarm = false;
 

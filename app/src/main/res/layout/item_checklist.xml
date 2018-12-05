@@ -30,5 +30,5 @@
         android:layout_gravity="center_vertical|end"
         android:background="@null"
         android:src="@drawable/ic_close"
-        android:visibility="invisible"/>
+        android:visibility="invisible" />
 </LinearLayout>
