@@ -9,16 +9,17 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import io.github.danielpinto8zz6.noteit.R;
 
-public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskListViewHolder> {
+public class TaskListAdapterView extends RecyclerView.Adapter<TaskListAdapterView.TaskListViewHolder> {
     private ArrayList<TaskListItem> taskList;
     private Context context;
 
-    public TaskListAdapter(Context context, ArrayList<TaskListItem> taskList) {
+    public TaskListAdapterView(Context context, ArrayList<TaskListItem> taskList) {
         this.context = context;
         this.taskList = taskList;
     }
@@ -27,7 +28,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskLi
     @Override
     public TaskListViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(context)
-                .inflate(R.layout.item_checklist, viewGroup, false);
+                .inflate(R.layout.item_checklist_view, viewGroup, false);
 
         return new TaskListViewHolder(view);
     }
@@ -38,25 +39,6 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskLi
 
         viewHolder.caption.setText(item.getCaption());
         viewHolder.checkBox.setChecked(item.isChecked());
-
-        viewHolder.caption.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) {
-                viewHolder.closeButton.setVisibility(View.VISIBLE);
-            } else {
-                viewHolder.closeButton.setVisibility(View.INVISIBLE);
-                item.setCaption(viewHolder.caption.getText().toString());
-            }
-        });
-
-        viewHolder.checkBox.setOnClickListener(v -> {
-            item.setChecked(viewHolder.checkBox.isChecked());
-        });
-
-        viewHolder.closeButton.setOnClickListener(v -> {
-            viewHolder.caption.setOnFocusChangeListener(null);
-            taskList.remove(item);
-            notifyDataSetChanged();
-        });
     }
 
     @Override
@@ -65,16 +47,14 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskLi
     }
 
     public class TaskListViewHolder extends RecyclerView.ViewHolder {
-        EditText caption;
+        TextView caption;
         CheckBox checkBox;
-        ImageButton closeButton;
 
         public TaskListViewHolder(@NonNull View itemView) {
             super(itemView);
 
             caption = itemView.findViewById(R.id.item_caption);
             checkBox = itemView.findViewById(R.id.item_checkbox);
-            closeButton = itemView.findViewById(R.id.item_close);
         }
     }
 }

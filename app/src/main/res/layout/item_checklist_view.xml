@@ -11,10 +11,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
-        android:clickable="true"
+        android:clickable="false"
         android:focusable="false" />
 
-    <EditText
+    <TextView
         android:id="@+id/item_caption"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,13 +22,4 @@
         android:layout_weight="1"
         android:background="@null"
         android:hint="@string/list_item" />
-
-    <ImageButton
-        android:id="@+id/item_close"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|end"
-        android:background="@null"
-        android:src="@drawable/ic_close"
-        android:visibility="invisible" />
 </LinearLayout>

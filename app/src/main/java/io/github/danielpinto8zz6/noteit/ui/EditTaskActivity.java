@@ -14,13 +14,15 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -55,6 +57,8 @@ public class EditTaskActivity extends AppCompatActivity implements View.OnClickL
     private static final int LOAD_IMAGE_RESULTS = 1234;
 
     private Note note;
+    private int hashCode;
+
     private boolean edit = false;
     private boolean force = false;
     private boolean hasAlarm = false;
@@ -62,7 +66,7 @@ public class EditTaskActivity extends AppCompatActivity implements View.OnClickL
     private TextView dateTv;
     private EditText titleEt;
     private EditText newItemEt;
-    private ListView lvItemList;
+    private RecyclerView lvItemList;
     private ImageView imageView;
 
     ArrayList<TaskListItem> taskList;
@@ -85,7 +89,7 @@ public class EditTaskActivity extends AppCompatActivity implements View.OnClickL
 
         titleEt = (EditText) findViewById(R.id.task_title);
         newItemEt = (EditText) findViewById(R.id.task_item);
-        lvItemList = (ListView) findViewById(R.id.task_list);
+        lvItemList = (RecyclerView) findViewById(R.id.task_list);
         dateTv = findViewById(R.id.note_date);
         imageView = findViewById(R.id.note_image);
 
@@ -102,18 +106,20 @@ public class EditTaskActivity extends AppCompatActivity implements View.OnClickL
 
         if (note != null) {
             edit = true;
-
         } else {
             note = new Note();
         }
 
         note.setType(1);
 
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        lvItemList.setLayoutManager(mLayoutManager);
+        lvItemList.setItemAnimator(new DefaultItemAnimator());
         listAdapter = new TaskListAdapter(this, taskList);
         lvItemList.setAdapter(listAdapter);
 
         if (edit) {
-            hasAlarm = (note.getNotify_date() != null);
+            hasAlarm = (note.getNotify_date() != null && !note.getNotify_date().isEmpty());
             titleEt.setText(note.getTitle());
             try {
                 JSONArray content = new JSONArray(note.getContent());
@@ -127,13 +133,13 @@ public class EditTaskActivity extends AppCompatActivity implements View.OnClickL
             }
 
             String editedDate = note.getEdited_date();
-            if (editedDate != null)
+            if (editedDate != null && !editedDate.isEmpty())
                 dateTv.setText(editedDate);
             else
                 dateTv.setText(note.getCreate_date());
 
             String color = note.getColor();
-            if (color != null) {
+            if (color != null && !color.isEmpty()) {
                 setToolbarColor(Color.parseColor(color));
             }
 
@@ -142,6 +148,8 @@ public class EditTaskActivity extends AppCompatActivity implements View.OnClickL
                 Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
                 imageView.setImageBitmap(bitmap);
             }
+
+            hashCode = note.hashCode();
         }
         if (!initial) {
             invalidateOptionsMenu();
@@ -174,7 +182,6 @@ public class EditTaskActivity extends AppCompatActivity implements View.OnClickL
 
                 if (!edit) {
                     saveNote();
-                    edit = true;
                 }
 
                 Intent i = new Intent(EditTaskActivity.this, NotificationService.class);
@@ -208,6 +215,13 @@ public class EditTaskActivity extends AppCompatActivity implements View.OnClickL
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Hack : clear focus to fire tasklist et focuschange listener
+        getCurrentFocus().clearFocus();
+        super.onBackPressed();
     }
 
     @Override
@@ -246,7 +260,6 @@ public class EditTaskActivity extends AppCompatActivity implements View.OnClickL
                 updateNote();
             } else {
                 saveNote();
-                edit = true;
             }
         }
 
@@ -254,54 +267,61 @@ public class EditTaskActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void updateNote() {
-        JSONArray jsonArray = new JSONArray();
-
-        try {
-            for (TaskListItem item : taskList) {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("name", item.getCaption());
-                jsonObject.put("checked", item.isChecked());
-                jsonArray.put(jsonObject);
+        String content = "";
+        if (taskList.size() > 0) {
+            JSONArray jsonArray = new JSONArray();
+            try {
+                for (TaskListItem item : taskList) {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("name", item.getCaption());
+                    jsonObject.put("checked", item.isChecked());
+                    jsonArray.put(jsonObject);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            content = jsonArray.toString();
         }
 
-        String orig = note.toString();
-
         note.setTitle(titleEt.getText().toString());
-        note.setContent(jsonArray.toString());
+        note.setContent(content);
 
-        if (!orig.equals(note.toString())) {
+        if (hashCode != note.hashCode()) {
             note.setEdited_date(Utils.getCurrentDateTime());
         }
 
         NoteDao.updateRecord(note);
+
+        hashCode = note.hashCode();
     }
 
     private void saveNote() {
-        JSONArray jsonArray = new JSONArray();
-        try {
-            for (TaskListItem item : taskList) {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("name", item.getCaption());
-                jsonObject.put("checked", item.isChecked());
-                jsonArray.put(jsonObject);
+        String content = "";
+        if (taskList.size() > 0) {
+            JSONArray jsonArray = new JSONArray();
+            try {
+                for (TaskListItem item : taskList) {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("name", item.getCaption());
+                    jsonObject.put("checked", item.isChecked());
+                    jsonArray.put(jsonObject);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            content = jsonArray.toString();
         }
-
-        String title = titleEt.getText().toString();
-        String content = jsonArray.toString();
-
-        if (title.isEmpty() && content.isEmpty())
-            return;
-
 
         note.setTitle(titleEt.getText().toString());
         note.setContent(content);
+
+        if (note.isEmpty())
+            return;
+
         note.setId((int) NoteDao.insertRecord(note));
+
+        edit = true;
+        hashCode = note.hashCode();
     }
 
     private void cancelNotification() {

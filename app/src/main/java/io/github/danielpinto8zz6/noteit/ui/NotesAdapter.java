@@ -1,17 +1,18 @@
 package io.github.danielpinto8zz6.noteit.ui;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -26,21 +27,21 @@ import io.github.danielpinto8zz6.noteit.notes.Note;
 import io.github.danielpinto8zz6.noteit.notes.NotesManager;
 
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
-    private final Activity activity;
+    private final Context context;
 
     private List<Integer> selectedIds = new ArrayList<>();
     private NotesManager notes;
 
-    public NotesAdapter(NotesManager notes, Activity activity) {
+    public NotesAdapter(NotesManager notes, Context context) {
         this.notes = notes;
-        this.activity = activity;
+        this.context = context;
     }
 
     @NonNull
     @Override
     public NotesViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
                                               int viewType) {
-        View view = LayoutInflater.from(activity)
+        View view = LayoutInflater.from(context)
                 .inflate(R.layout.item_note, parent, false);
 
         return new NotesViewHolder(view);
@@ -69,38 +70,42 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             notesViewHolder.notify_date.setVisibility(View.GONE);
         }
 
-//        if (note.gettype() == 1) {
-//            notesviewholder.content.setvisibility(view.invisible);
-//            notesviewholder.listview.setvisibility(view.visible);
-//
-//            arraylist<tasklistitem> tasklist = new arraylist<>();
-//            tasklistadapter listadapter = new tasklistadapter(activity, tasklist);
-//            notesviewholder.listview.setadapter(listadapter);
-//
-//            try {
-//                jsonarray content = new jsonarray(note.getcontent());
-//                for (int j = 0; j < content.length(); j++) {
-//                    jsonobject o = content.getjsonobject(j);
-//                    tasklist.add(new tasklistitem(o.getboolean("checked"), o.getstring("name")));
-//                }
-//                listadapter.notifydatasetchanged();
-//            } catch (exception e) {
-//                e.printstacktrace();
-//            }
-//
-//        } else {
-//            notesviewholder.content.setvisibility(view.visible);
-//            notesviewholder.listview.setvisibility(view.invisible);
-//        }
+        if (note.getType() == 1) {
+            notesViewHolder.content.setVisibility(View.GONE);
+            notesViewHolder.listView.setVisibility(View.VISIBLE);
+
+            ArrayList<TaskListItem> taskList = new ArrayList<>();
+
+            try {
+                JSONArray content = new JSONArray(note.getContent());
+                for (int j = 0; j < content.length(); j++) {
+                    JSONObject o = content.getJSONObject(j);
+                    taskList.add(new TaskListItem(o.getBoolean("checked"), o.getString("name")));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            TaskListAdapterView listAdapter = new TaskListAdapterView(context, taskList);
+            notesViewHolder.listView.setAdapter(listAdapter);
+
+            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(context);
+            notesViewHolder.listView.setLayoutManager(mLayoutManager);
+            listAdapter = new TaskListAdapterView(context, taskList);
+            notesViewHolder.listView.setAdapter(listAdapter);
+        } else {
+            notesViewHolder.content.setVisibility(View.VISIBLE);
+            notesViewHolder.listView.setVisibility(View.GONE);
+        }
 
         int id = note.getId();
 
         if (selectedIds.contains(id)) {
             //if item is selected then,set foreground color of FrameLayout.
-            notesViewHolder.rootView.setForeground(new ColorDrawable(ContextCompat.getColor(activity, R.color.colorControlActivated)));
+            notesViewHolder.rootView.setForeground(new ColorDrawable(ContextCompat.getColor(context, R.color.colorControlActivated)));
         } else {
             //else remove selected item color.
-            notesViewHolder.rootView.setForeground(new ColorDrawable(ContextCompat.getColor(activity, android.R.color.transparent)));
+            notesViewHolder.rootView.setForeground(new ColorDrawable(ContextCompat.getColor(context, android.R.color.transparent)));
         }
     }
 
@@ -123,7 +128,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         final TextView title;
         final TextView content;
         final TextView notify_date;
-        final ListView listView;
+        final RecyclerView listView;
         final FrameLayout color;
 
         NotesViewHolder(View view) {

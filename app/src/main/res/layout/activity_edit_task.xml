@@ -47,13 +47,11 @@
                 android:text="@string/add" />
         </LinearLayout>
 
-        <ListView
+        <android.support.v7.widget.RecyclerView
             android:id="@+id/task_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="6dp"
-            android:divider="@null"
-            android:dividerHeight="10dp" />
+            android:layout_margin="6dp" />
 
     </LinearLayout>
 

@@ -15,6 +15,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class Note implements Parcelable {
     private static final String COL_ID = "id";
     private static final String COL_TITLE = "title";
@@ -28,14 +31,15 @@ public class Note implements Parcelable {
     private static final String COL_TYPE = "type";
 
     private Integer id;
-    private String title;
-    private String content;
+    private String title = "";
 
-    private String create_date;
-    private String notify_date;
+    private String content = "";
 
-    private String edited_date;
-    private String color;
+    private String create_date = "";
+    private String notify_date = "";
+
+    private String edited_date = "";
+    private String color = "";
     private Integer status = 0;
     private byte[] image;
 
@@ -159,7 +163,7 @@ public class Note implements Parcelable {
     }
 
     public boolean isEmpty() {
-        return (title == null && content == null && color == null && notify_date == null) ? true : false;
+        return (title.isEmpty() && content.isEmpty() && color.isEmpty() && notify_date.isEmpty());
     }
 
     public Bundle toBundle() {
@@ -242,4 +246,29 @@ public class Note implements Parcelable {
             return new Note[size];
         }
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Note)) return false;
+        Note note = (Note) o;
+        return Objects.equals(id, note.id) &&
+                Objects.equals(title, note.title) &&
+                Objects.equals(content, note.content) &&
+                Objects.equals(create_date, note.create_date) &&
+                Objects.equals(notify_date, note.notify_date) &&
+                Objects.equals(edited_date, note.edited_date) &&
+                Objects.equals(color, note.color) &&
+                Objects.equals(status, note.status) &&
+                Arrays.equals(image, note.image) &&
+                Objects.equals(type, note.type);
+    }
+
+    @Override
+    public int hashCode() {
+
+        int result = Objects.hash(id, title, content, create_date, notify_date, edited_date, color, status, type);
+        result = 31 * result + Arrays.hashCode(image);
+        return result;
+    }
 }
