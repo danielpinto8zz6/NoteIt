@@ -2,7 +2,9 @@ package io.github.danielpinto8zz6.noteit.encryption;
 
 import android.util.Base64;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;

@@ -2,9 +2,11 @@ package io.github.danielpinto8zz6.noteit;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.UnsupportedEncodingException;
 
@@ -14,13 +16,14 @@ import static org.junit.Assert.assertEquals;
 
 public class UnitAESTest {
 
-    private final String path = "C:\\DATOS\\Universidad\\3-Tercero\\1\\GPS\\Demo-Note-it\\NoteIt\\app\\src\\main\\res\\EncriptionTestFile.txt";
+    private final File file = new File("C:\\DATOS\\Universidad\\3-Tercero\\1\\GPS\\Demo-Note-it\\NoteIt\\app\\src\\main\\res\\EncriptionTestFile.txt");
+    private final String path2 = "C:\\DATOS\\Universidad\\3-Tercero\\1\\GPS\\Demo-Note-it\\NoteIt\\app\\src\\main\\res";
     private final String password = "@#hello123$";
-    private final String pathEncrypt = "C:\\DATOS\\Universidad\\3-Tercero\\1\\GPS\\Demo-Note-it\\NoteIt\\app\\src\\main\\res\\EncriptionTestFile.txt.crypt";
     private final String outPath = "C:\\DATOS\\Universidad\\3-Tercero\\1\\GPS\\Demo-Note-it\\NoteIt\\app\\src\\main\\res\\EncriptionTestFileOut.txt";
-    private final File file = new File(path);
+    private final File file2 = new File(path2);
     private static String text = "";
     private static String textOut = "";
+    public ExpectedException exception = ExpectedException.none();
 
 
     @Before
@@ -34,7 +37,7 @@ public class UnitAESTest {
             br.close();
 
             //Encrypt
-            AESHelper.encryptfile(path, password);
+            AESHelper.encryptfile(file.getPath(), password);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -44,8 +47,9 @@ public class UnitAESTest {
     @Test
     public void Encryption_isCorrect() {
         try {
+            File fileEncrypt = new File("C:\\DATOS\\Universidad\\3-Tercero\\1\\GPS\\Demo-Note-it\\NoteIt\\app\\src\\main\\res\\EncriptionTestFile.crypy");
             //Decrypt
-            AESHelper.decrypt(pathEncrypt, password, outPath);
+            AESHelper.decrypt(fileEncrypt.getPath(), password, outPath);
 
             File fileOut = new File (outPath);
 
@@ -64,5 +68,31 @@ public class UnitAESTest {
         }
 
     }
+
+    @Test
+    public void EncriptionIfPathWrong(){
+        try {
+            exception.expect(FileNotFoundException.class);
+            AESHelper.encryptfile(path2, password);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Test
+    public void DecriptionIfPathWrong(){
+        try {
+            exception.expect(FileNotFoundException.class);
+            AESHelper.encryptfile(path2, password);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }
