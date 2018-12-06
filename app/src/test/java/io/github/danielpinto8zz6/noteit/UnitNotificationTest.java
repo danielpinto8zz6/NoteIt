@@ -45,14 +45,22 @@ public class UnitNotificationTest extends Activity{
         Intent i = new Intent(mContext, NotificationService.class);
         i.putExtra("note_id", note.getId());
         pi = PendingIntent.getService(mContext, note.getId(), i, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pi);
+        //alarmManager.setExact(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pi);
 
     }
+
+    @Test
+    public void notificationSetInNote_test(){
+        now.setSeconds(now.getSeconds()+5);
+        assertEquals(note.getNotify_date(), Utils.getDateTime(now));
+    }
+
+    /*
     @Test
     public void notificationSetInAlarm_test(){
         assertEquals(note.getNotify_date(), alarmManager.toString());
     }
-
+*/
 
 
 }
