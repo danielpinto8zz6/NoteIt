@@ -18,6 +18,9 @@ public class UnitAESTest {
 
     private final File file = new File("C:\\DATOS\\Universidad\\3-Tercero\\1\\GPS\\Demo-Note-it\\NoteIt\\app\\src\\main\\res\\EncriptionTestFile.txt");
     private final String path2 = "C:\\DATOS\\Universidad\\3-Tercero\\1\\GPS\\Demo-Note-it\\NoteIt\\app\\src\\main\\res";
+    private final String path3 = "C:\\DATOS\\Universidad\\3-Tercero\\1\\GPS\\Demo-Note-it\\NoteIt\\app\\src\\main\\res\\EncriptionTestFileEmpty.txt";
+    private final String path4 = "C:\\DATOS\\Universidad\\3-Tercero\\1\\GPS\\Demo-Note-it\\NoteIt\\app\\src\\main\\res\\EncriptionTestFileEmpty.cryp";
+    private final String path5 = "C:\\DATOS\\Universidad\\3-Tercero\\1\\GPS\\Demo-Note-it\\NoteIt\\app\\src\\main\\res\\EncriptionTestFileEmptyOut.txt";
     private final String password = "@#hello123$";
     private final String outPath = "C:\\DATOS\\Universidad\\3-Tercero\\1\\GPS\\Demo-Note-it\\NoteIt\\app\\src\\main\\res\\EncriptionTestFileOut.txt";
     private final File file2 = new File(path2);
@@ -94,5 +97,25 @@ public class UnitAESTest {
         }
     }
 
+    @Test
+    public void DecriptionIfFileEmpty(){
+        try {
+            AESHelper.encryptfile(path3, password);
+            AESHelper.decrypt(path4, password, path5);
 
+            File fileOut = new File (outPath);
+
+            BufferedReader br = new BufferedReader(new FileReader(fileOut));
+            while ((br.readLine() != null)) {
+                textOut = textOut + br.readLine();
+            }
+            br.close();
+
+            assertEquals("", textOut);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
