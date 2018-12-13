@@ -2,13 +2,16 @@ package io.github.danielpinto8zz6.noteit.ui;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -26,7 +29,7 @@ import com.kizitonwose.colorpreference.ColorDialog;
 import com.kizitonwose.colorpreference.ColorShape;
 import com.kunzisoft.switchdatetime.SwitchDateTimeDialogFragment;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -326,8 +329,8 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
     }
 
     public void attachImage(View view) {
-        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-        photoPickerIntent.setType("image/*");
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        photoPickerIntent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
         startActivityForResult(photoPickerIntent, LOAD_IMAGE_RESULTS);
     }
 
@@ -341,16 +344,43 @@ public class EditNoteActivity extends AppCompatActivity implements ColorDialog.O
         if (requestCode == LOAD_IMAGE_RESULTS && resultCode == RESULT_OK && data != null) {
             Uri uri = data.getData();
 
+            File file = new File(getPath(uri));
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                Bitmap bitmap = ThumbnailUtils.extractThumbnail(
+                        BitmapFactory.decodeFile(file.getAbsolutePath()), 512, 512);
                 byte[] image = Utils.getBitmapAsByteArray(bitmap);
                 BitmapFactory.decodeByteArray(image, 0, image.length);
                 note.setImage(image);
-                imageView.setImageBitmap(BitmapFactory.decodeByteArray(image, 0, image.length));
-            } catch (IOException e) {
+                imageView.setImageBitmap(bitmap);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public String getPath(Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        if (cursor == null) return null;
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String s = cursor.getString(column_index);
+        cursor.close();
+        return s;
+    }
+
+    public static Bitmap getThumbnail(ContentResolver cr, String path) throws Exception {
+
+        Cursor ca = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID}, MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
+        if (ca != null && ca.moveToFirst()) {
+            int id = ca.getInt(ca.getColumnIndex(MediaStore.MediaColumns._ID));
+            ca.close();
+            return MediaStore.Images.Thumbnails.getThumbnail(cr, id, MediaStore.Images.Thumbnails.MINI_KIND, null);
+        }
+
+        ca.close();
+        return null;
+
     }
 
     public void changeColor(View view) {
